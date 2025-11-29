@@ -1,155 +1,224 @@
 "use client";
 
-import type { Lesson } from "@/lib/types";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { CheckCircle2, Lock, Play, Star } from "lucide-react";
+import { motion } from "framer-motion";
+import { CheckCircle2, Crown, Lock, Play, Sparkles, Star, Zap } from "lucide-react";
 import Link from "next/link";
+import type { Lesson } from "@/lib/types";
 
 interface LearningPathProps {
 	documentId: string;
 	lessons: Lesson[];
 }
 
-// Duolingo-style colors for lesson nodes
+// Duolingo-style vibrant colors
 const lessonColors = [
-	{ bg: "from-emerald-400 to-emerald-600", shadow: "shadow-emerald-500/30" },
-	{ bg: "from-sky-400 to-sky-600", shadow: "shadow-sky-500/30" },
-	{ bg: "from-violet-400 to-violet-600", shadow: "shadow-violet-500/30" },
-	{ bg: "from-amber-400 to-amber-600", shadow: "shadow-amber-500/30" },
-	{ bg: "from-rose-400 to-rose-600", shadow: "shadow-rose-500/30" },
-	{ bg: "from-cyan-400 to-cyan-600", shadow: "shadow-cyan-500/30" },
-	{ bg: "from-fuchsia-400 to-fuchsia-600", shadow: "shadow-fuchsia-500/30" },
-	{ bg: "from-lime-400 to-lime-600", shadow: "shadow-lime-500/30" },
+	{ bg: "bg-emerald-500", hover: "hover:bg-emerald-400", glow: "shadow-emerald-500/50", ring: "ring-emerald-300" },
+	{ bg: "bg-sky-500", hover: "hover:bg-sky-400", glow: "shadow-sky-500/50", ring: "ring-sky-300" },
+	{ bg: "bg-violet-500", hover: "hover:bg-violet-400", glow: "shadow-violet-500/50", ring: "ring-violet-300" },
+	{ bg: "bg-amber-500", hover: "hover:bg-amber-400", glow: "shadow-amber-500/50", ring: "ring-amber-300" },
+	{ bg: "bg-rose-500", hover: "hover:bg-rose-400", glow: "shadow-rose-500/50", ring: "ring-rose-300" },
+	{ bg: "bg-cyan-500", hover: "hover:bg-cyan-400", glow: "shadow-cyan-500/50", ring: "ring-cyan-300" },
+	{ bg: "bg-fuchsia-500", hover: "hover:bg-fuchsia-400", glow: "shadow-fuchsia-500/50", ring: "ring-fuchsia-300" },
+	{ bg: "bg-lime-500", hover: "hover:bg-lime-400", glow: "shadow-lime-500/50", ring: "ring-lime-300" },
 ];
+
+// Zigzag pattern: center, right, center, left, center, right...
+const getXPosition = (index: number): "left" | "center" | "right" => {
+	const pattern: ("left" | "center" | "right")[] = ["center", "right", "center", "left"];
+	return pattern[index % 4]!;
+};
 
 interface LessonNodeProps {
 	lesson: Lesson;
 	index: number;
-	isFirst: boolean;
-	isLast: boolean;
+	totalLessons: number;
 	documentId: string;
 }
 
-function LessonNode({
-	lesson,
-	index,
-	isFirst,
-	isLast,
-	documentId,
-}: LessonNodeProps) {
-	const colorIndex = index % lessonColors.length;
-	const color = lessonColors[colorIndex];
+function LessonNode({ lesson, index, totalLessons, documentId }: LessonNodeProps) {
+	const color = lessonColors[index % lessonColors.length]!;
+	const position = getXPosition(index);
+	const nextPosition = index < totalLessons - 1 ? getXPosition(index + 1) : null;
 
-	// Calculate horizontal offset for the winding path effect
-	const offset = Math.sin((index * Math.PI) / 2) * 60;
-
-	// For now, first lesson is active, rest are locked
-	// In the future, you'd track progress
-	const isActive = isFirst;
+	// For demo: first lesson is active, rest are locked
+	const isActive = index === 0;
 	const isCompleted = false;
-	const isLocked = !isFirst && !isCompleted;
+	const isLocked = !isActive && !isCompleted;
+
+	// Calculate connector direction
+	const getConnectorStyle = () => {
+		if (nextPosition === null) return null;
+		
+		const directions: Record<string, Record<string, string>> = {
+			center: { right: "rotate-[30deg]", left: "rotate-[-30deg]", center: "rotate-0" },
+			right: { center: "rotate-[-30deg]", left: "rotate-[-45deg]", right: "rotate-0" },
+			left: { center: "rotate-[30deg]", right: "rotate-[45deg]", left: "rotate-0" },
+		};
+		return directions[position]?.[nextPosition] || "rotate-0";
+	};
 
 	return (
-		<div className="relative flex flex-col items-center" style={{ marginLeft: `${offset}px` }}>
-			{/* Connecting line to previous */}
-			{!isFirst && (
-				<div className="absolute -top-8 left-1/2 -translate-x-1/2 w-1 h-8 bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-500 rounded-full" />
+		<div
+			className={cn(
+				"relative flex flex-col items-center",
+				position === "left" && "self-start ml-8",
+				position === "right" && "self-end mr-8",
+				position === "center" && "self-center"
+			)}
+		>
+			{/* Connector to next node */}
+			{index < totalLessons && (
+				<motion.div
+					initial={{ scaleY: 0, opacity: 0 }}
+					animate={{ scaleY: 1, opacity: 1 }}
+					transition={{ delay: index * 0.1 + 0.3, duration: 0.4 }}
+					className={cn(
+						"absolute top-full left-1/2 -translate-x-1/2 w-2 h-16 rounded-full origin-top",
+						isLocked ? "bg-slate-300 dark:bg-slate-600" : "bg-slate-300 dark:bg-slate-500",
+						getConnectorStyle()
+					)}
+				/>
 			)}
 
-			{/* Lesson node */}
+			{/* Main node button */}
 			<Link
 				href={isLocked ? "#" : `/${documentId}/${lesson.id}`}
-				className={cn(
-					"relative group",
-					isLocked && "pointer-events-none",
-				)}
+				className={cn("relative", isLocked && "pointer-events-none")}
 			>
-				{/* Glow effect for active */}
-				{isActive && (
+				<motion.div
+					initial={{ scale: 0, opacity: 0 }}
+					animate={{ scale: 1, opacity: 1 }}
+					transition={{
+						type: "spring",
+						stiffness: 260,
+						damping: 20,
+						delay: index * 0.1,
+					}}
+					whileHover={!isLocked ? { scale: 1.15, y: -4 } : {}}
+					whileTap={!isLocked ? { scale: 0.95 } : {}}
+					className="relative"
+				>
+					{/* Pulsing glow for active */}
+					{isActive && (
+						<motion.div
+							animate={{
+								scale: [1, 1.3, 1],
+								opacity: [0.6, 0.2, 0.6],
+							}}
+							transition={{
+								duration: 2,
+								repeat: Infinity,
+								ease: "easeInOut",
+							}}
+							className={cn(
+								"absolute inset-0 rounded-full",
+								color.bg,
+								"blur-xl"
+							)}
+						/>
+					)}
+
+					{/* Node circle */}
 					<div
 						className={cn(
-							"absolute inset-0 rounded-full blur-xl opacity-50 animate-pulse",
-							`bg-gradient-to-br ${color.bg}`,
+							"relative w-[72px] h-[72px] rounded-full flex items-center justify-center transition-all duration-200",
+							isLocked
+								? "bg-slate-200 dark:bg-slate-700 cursor-not-allowed"
+								: cn(color.bg, color.hover, "cursor-pointer shadow-lg", color.glow),
+							isActive && "ring-4 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-900",
+							isActive && color.ring,
+							!isLocked && "active:shadow-md"
 						)}
-						style={{ transform: "scale(1.3)" }}
-					/>
-				)}
+					>
+						{/* Inner shadow for depth */}
+						{!isLocked && (
+							<div className="absolute inset-1 rounded-full bg-white/20" />
+						)}
 
-				{/* Main circle */}
-				<div
-					className={cn(
-						"relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300",
-						isLocked
-							? "bg-slate-200 dark:bg-slate-700"
-							: `bg-gradient-to-br ${color.bg} shadow-lg ${color.shadow}`,
-						!isLocked && "hover:scale-110 hover:shadow-xl cursor-pointer",
-						isActive && "ring-4 ring-white dark:ring-slate-800 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-900",
-					)}
-				>
-					{isCompleted ? (
-						<CheckCircle2 className="w-8 h-8 text-white" />
-					) : isLocked ? (
-						<Lock className="w-6 h-6 text-slate-400 dark:text-slate-500" />
-					) : (
-						<Play className="w-8 h-8 text-white fill-white ml-1" />
-					)}
+						{/* Icon */}
+						{isCompleted ? (
+							<CheckCircle2 className="w-8 h-8 text-white drop-shadow-sm" />
+						) : isLocked ? (
+							<Lock className="w-7 h-7 text-slate-400 dark:text-slate-500" />
+						) : (
+							<Play className="w-8 h-8 text-white fill-white drop-shadow-sm ml-1" />
+						)}
+					</div>
 
-					{/* Stars decoration for active */}
+					{/* Bouncing stars for active node */}
 					{isActive && (
 						<>
-							<Star className="absolute -top-1 -right-1 w-5 h-5 text-yellow-400 fill-yellow-400 animate-pulse" />
-							<Star
-								className="absolute -bottom-1 -left-1 w-4 h-4 text-yellow-400 fill-yellow-400 animate-pulse"
-								style={{ animationDelay: "300ms" }}
-							/>
+							<motion.div
+								animate={{ y: [0, -6, 0], rotate: [0, 15, 0] }}
+								transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+								className="absolute -top-2 -right-2"
+							>
+								<Star className="w-6 h-6 text-yellow-400 fill-yellow-400 drop-shadow-md" />
+							</motion.div>
+							<motion.div
+								animate={{ y: [0, -4, 0], rotate: [0, -15, 0] }}
+								transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+								className="absolute -top-1 -left-3"
+							>
+								<Sparkles className="w-5 h-5 text-yellow-300 fill-yellow-300" />
+							</motion.div>
 						</>
 					)}
-				</div>
 
-				{/* Lesson number badge */}
-				<div
-					className={cn(
-						"absolute -top-2 -left-2 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
-						isLocked
-							? "bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400"
-							: "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-md",
-					)}
-				>
-					{index + 1}
-				</div>
+					{/* Lesson number badge */}
+					<motion.div
+						initial={{ scale: 0 }}
+						animate={{ scale: 1 }}
+						transition={{ type: "spring", delay: index * 0.1 + 0.2 }}
+						className={cn(
+							"absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white dark:border-slate-900",
+							isLocked
+								? "bg-slate-300 dark:bg-slate-600 text-slate-500"
+								: "bg-white text-slate-800 shadow-md"
+						)}
+					>
+						{index + 1}
+					</motion.div>
+				</motion.div>
 			</Link>
 
-			{/* Lesson info */}
-			<div className="mt-4 text-center max-w-[200px]">
+			{/* Lesson title */}
+			<motion.div
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: index * 0.1 + 0.2 }}
+				className="mt-3 text-center max-w-[140px]"
+			>
 				<h3
 					className={cn(
-						"font-semibold text-sm",
-						isLocked
-							? "text-slate-400 dark:text-slate-500"
-							: "text-slate-700 dark:text-slate-200",
+						"font-bold text-sm leading-tight",
+						isLocked ? "text-slate-400 dark:text-slate-500" : "text-slate-700 dark:text-slate-200"
 					)}
 				>
 					{lesson.title}
 				</h3>
-				{lesson.description && !isLocked && (
-					<p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
-						{lesson.description}
-					</p>
-				)}
-			</div>
+			</motion.div>
 
 			{/* Start button for active lesson */}
 			{isActive && (
-				<Button
-					asChild
-					className="mt-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25"
+				<motion.div
+					initial={{ opacity: 0, scale: 0.8 }}
+					animate={{ opacity: 1, scale: 1 }}
+					transition={{ delay: 0.4, type: "spring" }}
 				>
-					<Link href={`/${documentId}/${lesson.id}`}>
-						<Play className="w-4 h-4 mr-2 fill-current" />
-						Start Lesson
-					</Link>
-				</Button>
+					<Button
+						asChild
+						size="lg"
+						className="mt-4 bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-300 hover:to-emerald-500 text-white font-bold shadow-lg shadow-emerald-500/30 border-b-4 border-emerald-700 hover:border-emerald-600 active:border-b-0 active:mt-5 transition-all"
+					>
+						<Link href={`/${documentId}/${lesson.id}`}>
+							<Zap className="w-5 h-5 mr-2 fill-current" />
+							START
+						</Link>
+					</Button>
+				</motion.div>
 			)}
 		</div>
 	);
@@ -167,36 +236,51 @@ export function LearningPath({ documentId, lessons }: LearningPathProps) {
 	}
 
 	return (
-		<div className="relative py-8">
-			{/* Path background decoration */}
-			<div className="absolute inset-0 flex justify-center pointer-events-none">
-				<div className="w-px h-full bg-gradient-to-b from-transparent via-slate-200 dark:via-slate-700 to-transparent" />
-			</div>
+		<div className="relative py-8 px-4">
+			{/* Vertical dotted line guide */}
+			<div className="absolute left-1/2 top-8 bottom-8 -translate-x-1/2 w-0.5 bg-gradient-to-b from-slate-200 via-slate-300 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 opacity-50" />
 
-			{/* Lessons */}
-			<div className="relative flex flex-col items-center gap-16">
+			{/* Lessons container */}
+			<div className="relative flex flex-col items-center gap-20">
 				{lessons.map((lesson, index) => (
 					<LessonNode
 						key={lesson.id}
 						lesson={lesson}
 						index={index}
-						isFirst={index === 0}
-						isLast={index === lessons.length - 1}
+						totalLessons={lessons.length}
 						documentId={documentId}
 					/>
 				))}
 
-				{/* Finish flag at the end */}
-				<div className="flex flex-col items-center mt-4">
-					<div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
-						<span className="text-2xl">🏆</span>
-					</div>
-					<p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">
-						Complete the course!
-					</p>
-				</div>
+				{/* Trophy at the end */}
+				<motion.div
+					initial={{ scale: 0, opacity: 0 }}
+					animate={{ scale: 1, opacity: 1 }}
+					transition={{ delay: lessons.length * 0.1, type: "spring" }}
+					className={cn(
+						"relative flex flex-col items-center",
+						getXPosition(lessons.length) === "left" && "self-start ml-8",
+						getXPosition(lessons.length) === "right" && "self-end mr-8",
+						getXPosition(lessons.length) === "center" && "self-center"
+					)}
+				>
+					<motion.div
+						whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+						transition={{ duration: 0.4 }}
+						className="w-20 h-20 rounded-full bg-gradient-to-b from-yellow-300 to-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/40 cursor-pointer border-b-4 border-amber-600"
+					>
+						<Crown className="w-10 h-10 text-white fill-white drop-shadow-md" />
+					</motion.div>
+					<motion.p
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						transition={{ delay: lessons.length * 0.1 + 0.2 }}
+						className="mt-3 text-sm font-bold text-amber-600 dark:text-amber-400"
+					>
+						FINISH!
+					</motion.p>
+				</motion.div>
 			</div>
 		</div>
 	);
 }
-
