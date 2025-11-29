@@ -1,5 +1,3 @@
-"use server";
-
 import type { createClient } from "@/lib/supabase/server";
 import { cleanJsonResponse, GEMINI_MODEL, genAI } from "./gemini";
 

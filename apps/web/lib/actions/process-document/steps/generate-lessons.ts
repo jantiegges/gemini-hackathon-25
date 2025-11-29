@@ -1,5 +1,3 @@
-"use server";
-
 import { cleanJsonResponse, GEMINI_MODEL, genAI } from "./gemini";
 
 export interface LessonData {

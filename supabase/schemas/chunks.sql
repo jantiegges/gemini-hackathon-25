@@ -7,6 +7,4 @@ CREATE TABLE IF NOT EXISTS chunks (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Index for faster lookups by document
-CREATE INDEX IF NOT EXISTS idx_chunks_document_id ON chunks(document_id);
 

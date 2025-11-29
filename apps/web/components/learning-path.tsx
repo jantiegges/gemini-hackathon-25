@@ -105,17 +105,23 @@ const getNodeCenter = (index: number) => {
 interface LessonNodeProps {
 	lesson: Lesson;
 	index: number;
+	isUnlocked: boolean;
 	documentId: string;
 }
 
-function LessonNode({ lesson, index, documentId }: LessonNodeProps) {
+function LessonNode({
+	lesson,
+	index,
+	isUnlocked,
+	documentId,
+}: LessonNodeProps) {
 	const color = lessonColors[index % lessonColors.length]!;
 	const { x, y } = getNodeCenter(index);
 	const position = getXPosition(index);
 
-	const isActive = index === 0;
-	const isCompleted = false;
-	const isLocked = !isActive && !isCompleted;
+	const isCompleted = lesson.is_completed;
+	const isLocked = !isUnlocked;
+	const isActive = isUnlocked && !isCompleted;
 
 	// Determine text position: opposite side of node position
 	// left node → text on right, right node → text on left, center → alternate
@@ -207,20 +213,34 @@ function LessonNode({ lesson, index, documentId }: LessonNodeProps) {
 						</>
 					)}
 
-					{/* Number badge */}
+					{/* Lesson number badge */}
 					<motion.div
 						initial={{ scale: 0 }}
 						animate={{ scale: 1 }}
 						transition={{ type: "spring", delay: index * 0.1 + 0.2 }}
 						className={cn(
-							"absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white dark:border-slate-900",
+							"absolute -top-2 -left-2 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
 							isLocked
-								? "bg-slate-300 dark:bg-slate-600 text-slate-500"
-								: "bg-white text-slate-800 shadow-md",
+								? "bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400"
+								: isCompleted
+									? "bg-emerald-500 text-white shadow-md"
+									: "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-md",
 						)}
 					>
-						{index + 1}
+						{isCompleted ? "✓" : index + 1}
 					</motion.div>
+
+					{/* Score badge for completed lessons */}
+					{isCompleted && lesson.best_score !== null && (
+						<motion.div
+							initial={{ scale: 0 }}
+							animate={{ scale: 1 }}
+							transition={{ type: "spring", delay: index * 0.1 + 0.3 }}
+							className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-amber-400 text-amber-900 text-xs font-bold shadow-md"
+						>
+							{lesson.best_score}%
+						</motion.div>
+					)}
 				</motion.div>
 			</Link>
 
@@ -247,7 +267,7 @@ function LessonNode({ lesson, index, documentId }: LessonNodeProps) {
 				</h3>
 			</motion.div>
 
-			{/* Start button - centered below node */}
+			{/* Start/Continue button for active lesson */}
 			{isActive && (
 				<motion.div
 					initial={{ opacity: 0, scale: 0.8, y: 10 }}
@@ -264,6 +284,20 @@ function LessonNode({ lesson, index, documentId }: LessonNodeProps) {
 							<Zap className="w-4 h-4 mr-1 fill-current" />
 							START
 						</Link>
+					</Button>
+				</motion.div>
+			)}
+
+			{/* Retry button for completed lessons */}
+			{isCompleted && (
+				<motion.div
+					initial={{ opacity: 0, scale: 0.8, y: 10 }}
+					animate={{ opacity: 1, scale: 1, y: 0 }}
+					transition={{ delay: 0.4, type: "spring" }}
+					className="absolute top-full left-1/2 -translate-x-1/2 mt-3"
+				>
+					<Button asChild variant="outline" size="sm">
+						<Link href={`/${documentId}/${lesson.id}`}>Practice Again</Link>
 					</Button>
 				</motion.div>
 			)}
@@ -328,6 +362,17 @@ export function LearningPath({ documentId, lessons }: LearningPathProps) {
 		);
 	}
 
+	// Determine which lessons are unlocked
+	// A lesson is unlocked if it's the first OR the previous lesson is completed
+	const getIsUnlocked = (index: number): boolean => {
+		if (index === 0) return true;
+		const prevLesson = lessons[index - 1];
+		return prevLesson?.is_completed ?? false;
+	};
+
+	// Check if all lessons are completed
+	const allCompleted = lessons.every((l) => l.is_completed);
+
 	const totalHeight = (lessons.length + 1) * ROW_HEIGHT;
 	const trophyPos = getNodeCenter(lessons.length);
 
@@ -346,6 +391,7 @@ export function LearningPath({ documentId, lessons }: LearningPathProps) {
 						key={lesson.id}
 						lesson={lesson}
 						index={index}
+						isUnlocked={getIsUnlocked(index)}
 						documentId={documentId}
 					/>
 				))}
@@ -363,14 +409,36 @@ export function LearningPath({ documentId, lessons }: LearningPathProps) {
 					}}
 				>
 					<motion.div
-						whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+						whileHover={
+							allCompleted ? { scale: 1.1, rotate: [0, -5, 5, 0] } : {}
+						}
 						transition={{ duration: 0.4 }}
-						className="w-20 h-20 rounded-full bg-gradient-to-b from-yellow-300 to-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/40 cursor-pointer border-b-4 border-amber-600"
+						className={cn(
+							"w-20 h-20 rounded-full flex items-center justify-center shadow-lg border-b-4",
+							allCompleted
+								? "bg-gradient-to-b from-yellow-300 to-amber-500 shadow-amber-500/40 cursor-pointer border-amber-600 animate-bounce"
+								: "bg-slate-200 dark:bg-slate-700 border-slate-300 dark:border-slate-600",
+						)}
+						style={allCompleted ? { animationDuration: "2s" } : {}}
 					>
-						<Crown className="w-10 h-10 text-white fill-white drop-shadow-md" />
+						<Crown
+							className={cn(
+								"w-10 h-10 drop-shadow-md",
+								allCompleted
+									? "text-white fill-white"
+									: "text-slate-400 dark:text-slate-500 fill-slate-400 dark:fill-slate-500",
+							)}
+						/>
 					</motion.div>
-					<p className="mt-2 text-sm font-bold text-amber-600 dark:text-amber-400">
-						FINISH!
+					<p
+						className={cn(
+							"mt-2 text-sm font-bold",
+							allCompleted
+								? "text-amber-600 dark:text-amber-400"
+								: "text-slate-400 dark:text-slate-500",
+						)}
+					>
+						{allCompleted ? "Course Complete! 🎉" : "FINISH!"}
 					</p>
 				</motion.div>
 			</div>
