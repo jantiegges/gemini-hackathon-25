@@ -33,15 +33,12 @@ export async function POST() {
 			},
 		});
 
-		console.log("[Live Token] Generated ephemeral token");
-
 		// Return the token name (this is what the client uses as the API key)
 		return NextResponse.json({
 			token: token.name,
 			expireTime: expireTime,
 		});
 	} catch (error) {
-		console.error("[Live Token] Error:", error);
 		return NextResponse.json(
 			{
 				error:

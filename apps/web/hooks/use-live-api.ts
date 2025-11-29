@@ -41,7 +41,6 @@ export interface UseLiveApiOptions {
 		}>;
 	}>;
 	onFunctionCall?: (call: FunctionCall) => void;
-	onTranscript?: (text: string, isUser: boolean) => void;
 	onError?: (error: string) => void;
 }
 
@@ -59,8 +58,8 @@ const INPUT_SAMPLE_RATE = 16000;
 const OUTPUT_SAMPLE_RATE = 24000;
 
 /**
- * Hook for managing Gemini Live API connection with real-time audio
- * Uses the @google/genai SDK for proper ephemeral token support
+ * Hook for managing Gemini Live API connection with real-time audio.
+ * Uses the @google/genai SDK with ephemeral tokens for secure client-side access.
  */
 export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 	const { systemPrompt, tools, onFunctionCall, onError } = options;
@@ -79,10 +78,10 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 	const processorRef = useRef<ScriptProcessorNode | null>(null);
 	const audioQueueRef = useRef<Float32Array[]>([]);
 	const isPlayingRef = useRef(false);
+	const examEndedRef = useRef(false);
 
 	// Cleanup function
 	const cleanup = useCallback(() => {
-		// Stop media stream
 		if (mediaStreamRef.current) {
 			for (const track of mediaStreamRef.current.getTracks()) {
 				track.stop();
@@ -90,19 +89,16 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 			mediaStreamRef.current = null;
 		}
 
-		// Disconnect processor
 		if (processorRef.current) {
 			processorRef.current.disconnect();
 			processorRef.current = null;
 		}
 
-		// Close audio context
 		if (audioContextRef.current && audioContextRef.current.state !== "closed") {
 			audioContextRef.current.close();
 			audioContextRef.current = null;
 		}
 
-		// Close session
 		if (sessionRef.current) {
 			try {
 				sessionRef.current.close();
@@ -116,7 +112,7 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 		isPlayingRef.current = false;
 	}, []);
 
-	// Play audio from the queue
+	// Play queued audio chunks sequentially
 	const playAudioQueue = useCallback(() => {
 		if (isPlayingRef.current || audioQueueRef.current.length === 0) {
 			return;
@@ -159,7 +155,7 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 		playNextChunk();
 	}, []);
 
-	// Convert Int16 PCM to Float32
+	// Convert Int16 PCM to Float32 for Web Audio API
 	const int16ToFloat32 = useCallback((int16Array: Int16Array): Float32Array => {
 		const float32Array = new Float32Array(int16Array.length);
 		for (let i = 0; i < int16Array.length; i++) {
@@ -171,7 +167,7 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 		return float32Array;
 	}, []);
 
-	// Convert Float32 to Int16 PCM
+	// Convert Float32 to Int16 PCM for sending to API
 	const float32ToInt16 = useCallback(
 		(float32Array: Float32Array): Int16Array => {
 			const int16Array = new Int16Array(float32Array.length);
@@ -187,20 +183,15 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 		[],
 	);
 
-	// Track if exam has ended to prevent duplicate handling
-	const examEndedRef = useRef(false);
-
 	// Handle incoming messages from the Live API
 	const handleMessage = useCallback(
 		(message: LiveServerMessage) => {
-			console.log("[LiveAPI] Message received:", message);
-
 			// Ignore messages after exam has ended
 			if (examEndedRef.current) {
 				return;
 			}
 
-			// Handle audio data directly on message.data (as shown in docs)
+			// Handle audio data
 			if (message.data) {
 				try {
 					const binaryString = atob(message.data as string);
@@ -216,16 +207,14 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 					const float32Data = int16ToFloat32(int16Data);
 					audioQueueRef.current.push(float32Data);
 					playAudioQueue();
-				} catch (err) {
-					console.error("[LiveAPI] Error processing audio data:", err);
+				} catch {
+					// Ignore audio processing errors
 				}
 			}
 
 			// Handle server content
 			if (message.serverContent) {
 				const content = message.serverContent;
-
-				// Handle turn complete
 				if (content.turnComplete) {
 					setState("listening");
 					setIsAiSpeaking(false);
@@ -237,10 +226,9 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 				const functionCalls = message.toolCall.functionCalls || [];
 				for (const fc of functionCalls) {
 					const fcName = fc.name || "unknown";
-					console.log("[LiveAPI] Function call:", fcName, fc.args);
 					onFunctionCall?.({ name: fcName, args: fc.args || {} });
 
-					// Handle end_exam specifically (only once)
+					// Handle end_exam (only once)
 					if (fcName === "end_exam" && !examEndedRef.current) {
 						examEndedRef.current = true;
 
@@ -264,15 +252,14 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 										},
 									],
 								});
-								// Close the session after a brief delay to let response send
 								setTimeout(() => {
 									if (sessionRef.current) {
 										sessionRef.current.close();
 										sessionRef.current = null;
 									}
 								}, 500);
-							} catch (err) {
-								console.error("[LiveAPI] Error sending tool response:", err);
+							} catch {
+								// Ignore tool response errors
 							}
 						}
 					}
@@ -282,65 +269,54 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 		[int16ToFloat32, onFunctionCall, playAudioQueue],
 	);
 
-	// Setup audio input (microphone)
+	// Setup microphone input
 	const setupAudioInput = useCallback(async () => {
 		const audioContext = audioContextRef.current;
 		const session = sessionRef.current;
 		if (!audioContext || !session) return;
 
-		try {
-			const stream = await navigator.mediaDevices.getUserMedia({
-				audio: {
-					sampleRate: INPUT_SAMPLE_RATE,
-					channelCount: 1,
-					echoCancellation: true,
-					noiseSuppression: true,
-				},
-			});
+		const stream = await navigator.mediaDevices.getUserMedia({
+			audio: {
+				sampleRate: INPUT_SAMPLE_RATE,
+				channelCount: 1,
+				echoCancellation: true,
+				noiseSuppression: true,
+			},
+		});
 
-			mediaStreamRef.current = stream;
+		mediaStreamRef.current = stream;
 
-			const source = audioContext.createMediaStreamSource(stream);
-			const processor = audioContext.createScriptProcessor(4096, 1, 1);
-			processorRef.current = processor;
+		const source = audioContext.createMediaStreamSource(stream);
+		const processor = audioContext.createScriptProcessor(4096, 1, 1);
+		processorRef.current = processor;
 
-			processor.onaudioprocess = (e) => {
-				if (!sessionRef.current) {
-					return;
-				}
+		processor.onaudioprocess = (e) => {
+			if (!sessionRef.current) return;
 
-				const inputData = e.inputBuffer.getChannelData(0);
-				const int16Data = float32ToInt16(inputData);
+			const inputData = e.inputBuffer.getChannelData(0);
+			const int16Data = float32ToInt16(inputData);
 
-				// Convert to base64
-				const bytes = new Uint8Array(int16Data.buffer);
-				let binary = "";
-				for (let i = 0; i < bytes.length; i++) {
-					binary += String.fromCharCode(bytes[i] as number);
-				}
-				const base64 = btoa(binary);
+			const bytes = new Uint8Array(int16Data.buffer);
+			let binary = "";
+			for (let i = 0; i < bytes.length; i++) {
+				binary += String.fromCharCode(bytes[i] as number);
+			}
+			const base64 = btoa(binary);
 
-				// Send realtime input via SDK (correct method from docs)
-				try {
-					sessionRef.current.sendRealtimeInput({
-						audio: {
-							data: base64,
-							mimeType: `audio/pcm;rate=${INPUT_SAMPLE_RATE}`,
-						},
-					});
-				} catch {
-					// Session might be closed
-				}
-			};
+			try {
+				sessionRef.current.sendRealtimeInput({
+					audio: {
+						data: base64,
+						mimeType: `audio/pcm;rate=${INPUT_SAMPLE_RATE}`,
+					},
+				});
+			} catch {
+				// Session might be closed
+			}
+		};
 
-			source.connect(processor);
-			processor.connect(audioContext.destination);
-
-			console.log("[LiveAPI] Audio input setup complete");
-		} catch (err) {
-			console.error("[LiveAPI] Failed to setup audio input:", err);
-			throw new Error("Microphone access denied");
-		}
+		source.connect(processor);
+		processor.connect(audioContext.destination);
 	}, [float32ToInt16]);
 
 	// Connect to Live API
@@ -355,29 +331,22 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 		examEndedRef.current = false;
 
 		try {
-			// Get ephemeral token from our backend
-			console.log("[LiveAPI] Fetching ephemeral token...");
 			const tokenResponse = await fetch("/api/live/token", { method: "POST" });
 			if (!tokenResponse.ok) {
 				const errorData = await tokenResponse.json();
 				throw new Error(errorData.error || "Failed to get access token");
 			}
 			const { token } = await tokenResponse.json();
-			console.log("[LiveAPI] Got ephemeral token");
 
-			// Create audio context
 			audioContextRef.current = new AudioContext({
 				sampleRate: OUTPUT_SAMPLE_RATE,
 			});
 
-			// Create GoogleGenAI client with ephemeral token
-			// Must use v1alpha for ephemeral token support
 			const ai = new GoogleGenAI({
 				apiKey: token,
 				httpOptions: { apiVersion: "v1alpha" },
 			});
 
-			// Build config object (matching docs structure)
 			// biome-ignore lint/suspicious/noExplicitAny: SDK types are complex
 			const config: any = {
 				responseModalities: [Modality.AUDIO],
@@ -391,29 +360,23 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 				},
 			};
 
-			// Add tools if provided
 			if (tools && tools.length > 0) {
 				config.tools = tools;
 			}
 
-			// Connect to Live API using SDK (matching docs structure)
-			console.log("[LiveAPI] Connecting to Live API...");
 			const session = await ai.live.connect({
 				model: "gemini-2.5-flash-native-audio-preview-09-2025",
 				callbacks: {
 					onopen: () => {
-						console.log("[LiveAPI] Session opened");
 						setState("listening");
 					},
 					onmessage: handleMessage,
 					onerror: (err: ErrorEvent) => {
-						console.error("[LiveAPI] Session error:", err.message);
 						setError(err.message || "Connection error");
 						setState("error");
 						onError?.(err.message || "Connection error");
 					},
-					onclose: (event: CloseEvent) => {
-						console.log("[LiveAPI] Session closed:", event.reason);
+					onclose: () => {
 						setState((currentState) =>
 							currentState === "ended" ? "ended" : "idle",
 						);
@@ -423,15 +386,9 @@ export function useLiveApi(options: UseLiveApiOptions): LiveApiReturn {
 			});
 
 			sessionRef.current = session;
-			console.log("[LiveAPI] Connected, setting up audio input...");
-
-			// Setup audio input
 			await setupAudioInput();
-
 			setState("connected");
-			console.log("[LiveAPI] Fully connected and ready");
 		} catch (err) {
-			console.error("[LiveAPI] Connection error:", err);
 			const errorMessage =
 				err instanceof Error ? err.message : "Connection failed";
 			setError(errorMessage);
