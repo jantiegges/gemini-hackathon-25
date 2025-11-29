@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import type {
 	FillInBlankCardContent,
 	InfographicCardContent,
@@ -7,8 +8,7 @@ import type {
 	TextCardContent,
 } from "@/lib/cards";
 import type { Card } from "@/lib/types";
-import { cn } from "@workspace/ui/lib/utils";
-import { useCallback, useState } from "react";
+import { CardTemplate } from "./cards/card-template";
 import { FillInBlankCard } from "./cards/fill-in-blank-card";
 import { InfographicCard } from "./cards/infographic-card";
 import { McQuestionCard } from "./cards/mc-question-card";
@@ -28,7 +28,6 @@ const QUESTION_CARD_TYPES = ["mc_question", "fill_in_blank"];
 export function LessonPlayer({
 	documentId,
 	lessonId,
-	lessonTitle,
 	cards,
 }: LessonPlayerProps) {
 	const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -37,7 +36,7 @@ export function LessonPlayer({
 
 	// Count total questions
 	const totalQuestions = cards.filter((c) =>
-		QUESTION_CARD_TYPES.includes(c.type),
+		QUESTION_CARD_TYPES.includes(c.type as string),
 	).length;
 
 	const handleContinue = useCallback(() => {
@@ -89,110 +88,92 @@ export function LessonPlayer({
 
 	// Render the appropriate card component based on type
 	const renderCard = () => {
-		switch (currentCard.type) {
-			case "text":
+		const cardContent = currentCard.content;
+		const cardId = currentCard.id;
+		const cardType = currentCard.type as string;
+
+		const progress = {
+			current: currentCardIndex + 1,
+			total: cards.length,
+		};
+
+		switch (cardType) {
+			case "text": {
+				const content = cardContent as TextCardContent;
 				return (
-					<TextCard
-						key={currentCard.id}
-						content={currentCard.content as TextCardContent}
-						onContinue={handleContinue}
-					/>
+					<CardTemplate
+						key={cardId}
+						title={content.title}
+						tag="Concept"
+						tagColor="sky"
+						progress={progress}
+					>
+						<TextCard content={content} onContinue={handleContinue} />
+					</CardTemplate>
 				);
-			case "mc_question":
+			}
+			case "mc_question": {
+				const content = cardContent as McQuestionCardContent;
 				return (
-					<McQuestionCard
-						key={currentCard.id}
-						content={currentCard.content as McQuestionCardContent}
-						onAnswer={handleAnswer}
-					/>
+					<CardTemplate
+						key={cardId}
+						title=""
+						tag="Knowledge Check"
+						tagColor="violet"
+						progress={progress}
+					>
+						<McQuestionCard content={content} onAnswer={handleAnswer} />
+					</CardTemplate>
 				);
-			case "fill_in_blank":
+			}
+			case "fill_in_blank": {
+				const content = cardContent as unknown as FillInBlankCardContent;
 				return (
-					<FillInBlankCard
-						key={currentCard.id}
-						content={currentCard.content as FillInBlankCardContent}
-						onAnswer={handleAnswer}
-					/>
+					<CardTemplate
+						key={cardId}
+						title=""
+						tag="Fill in the Blanks"
+						tagColor="amber"
+						progress={progress}
+					>
+						<FillInBlankCard content={content} onAnswer={handleAnswer} />
+					</CardTemplate>
 				);
-			case "infographic":
+			}
+			case "infographic": {
+				const content = cardContent as unknown as InfographicCardContent;
 				return (
-					<InfographicCard
-						key={currentCard.id}
-						content={currentCard.content as InfographicCardContent}
-						onContinue={handleContinue}
-					/>
+					<CardTemplate
+						key={cardId}
+						title={content.title}
+						tag="Infographic"
+						tagColor="fuchsia"
+						progress={progress}
+					>
+						<InfographicCard content={content} onContinue={handleContinue} />
+					</CardTemplate>
 				);
-			default:
+			}
+			default: {
 				// Fallback for unknown card types - treat as text
+				const fallbackContent: TextCardContent = {
+					title: "Content",
+					body: JSON.stringify(cardContent, null, 2),
+				};
 				return (
-					<TextCard
-						key={currentCard.id}
-						content={{
-							title: "Content",
-							body: JSON.stringify(currentCard.content, null, 2),
-						}}
-						onContinue={handleContinue}
-					/>
+					<CardTemplate
+						key={cardId}
+						title={fallbackContent.title}
+						tag="Content"
+						tagColor="primary"
+						progress={progress}
+					>
+						<TextCard content={fallbackContent} onContinue={handleContinue} />
+					</CardTemplate>
 				);
+			}
 		}
 	};
 
-	// Get the color for progress dots based on card type
-	const getCardDotColor = (card: Card, index: number): string => {
-		if (index === currentCardIndex) {
-			return "w-6 bg-gradient-to-r from-violet-500 to-fuchsia-500";
-		}
-		if (index < currentCardIndex) {
-			if (QUESTION_CARD_TYPES.includes(card.type)) {
-				return "bg-emerald-400"; // Answered questions
-			}
-			if (card.type === "infographic") {
-				return "bg-fuchsia-400";
-			}
-			return "bg-slate-400 dark:bg-slate-500"; // Completed non-questions
-		}
-		return "bg-slate-200 dark:bg-slate-700"; // Future cards
-	};
-
-	return (
-		<div className="flex flex-col h-full max-w-2xl mx-auto">
-			{/* Progress bar */}
-			<div className="mb-6">
-				<div className="flex items-center justify-between mb-2">
-					<span className="text-sm font-medium text-slate-600 dark:text-slate-400">
-						{lessonTitle}
-					</span>
-					<span className="text-sm text-slate-500 dark:text-slate-500">
-						{currentCardIndex + 1} / {cards.length}
-					</span>
-				</div>
-				<div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-					<div
-						className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-300 ease-out"
-						style={{
-							width: `${((currentCardIndex + 1) / cards.length) * 100}%`,
-						}}
-					/>
-				</div>
-			</div>
-
-			{/* Progress dots */}
-			<div className="flex justify-center gap-1.5 mb-8">
-				{cards.map((card, index) => (
-					<div
-						key={card.id}
-						className={cn(
-							"w-2 h-2 rounded-full transition-all duration-200",
-							getCardDotColor(card, index),
-						)}
-					/>
-				))}
-			</div>
-
-			{/* Card content */}
-			<div className="flex-1 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-lg">
-				{renderCard()}
-			</div>
-		</div>
-	);
+	return renderCard();
 }
