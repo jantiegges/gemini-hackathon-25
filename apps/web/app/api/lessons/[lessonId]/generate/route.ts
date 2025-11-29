@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
+import { generateLesson } from "@/lib/cards";
 import { createClient } from "@/lib/supabase/server";
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -67,138 +68,30 @@ export async function POST(
 		console.log(`[Generate] Found ${chunks.length} chunks`);
 
 		// 4. Combine chunk content
-		const combinedContent = chunks.map((c) => c.content).join("\n\n---\n\n");
-		console.log(
-			`[Generate] Combined content length: ${combinedContent.length}`,
-		);
+		const lessonContent = chunks.map((c) => c.content).join("\n\n---\n\n");
+		console.log(`[Generate] Combined content length: ${lessonContent.length}`);
 
-		// 5. Generate cards using Gemini
-		console.log("[Generate] Step 4: Generating cards with Gemini...");
-		const cardsResult = await genAI.models.generateContent({
-			model: "gemini-2.0-flash",
-			contents: [
-				{
-					role: "user",
-					parts: [
-						{
-							text: `You are creating flashcard-style learning cards for a Duolingo-style educational app.
-
-Based on the following educational content, create EXACTLY 6-8 learning cards (no more than 8, no less than 6).
-
-STRICT LIMIT: Maximum 8 cards total. Do NOT exceed this limit.
-
-Mix the card types for engaging learning flow. Recommended pattern:
-- 2-3 Text cards (introduce and explain concepts)
-- 3-4 MC questions (test understanding)
-- 1 Text card (optional summary)
-
-Content to teach:
-${combinedContent}
-
-Lesson title: ${lesson.title}
-Lesson description: ${lesson.description || ""}
-
-Return a JSON array of cards. Each card should have:
-- type: "text" or "mc_question"
-- content: object with card-specific fields
-
-For TEXT cards:
-{
-  "type": "text",
-  "content": {
-    "title": "Short title for this concept",
-    "body": "Markdown-formatted explanation. Use **bold** for emphasis, bullet points for lists, and LaTeX for math ($inline$ or $$block$$). Keep it concise but informative - 2-4 sentences or a few bullet points."
-  }
-}
-
-For MC_QUESTION cards:
-{
-  "type": "mc_question",
-  "content": {
-    "question": "Clear question testing understanding of the concept",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "correct_index": 0,
-    "explanation": "Brief explanation of why this answer is correct"
-  }
-}
-
-Guidelines:
-- Make text cards concise and focused on ONE concept
-- Make MC questions test understanding, not just recall
-- Use LaTeX for any mathematical expressions
-- Provide 4 options for MC questions
-- Make wrong options plausible but clearly incorrect
-- Keep explanations brief but helpful
-
-Return ONLY the JSON array, no markdown code blocks.`,
-						},
-					],
-				},
-			],
+		// 5. Generate cards using the two-step process
+		console.log("[Generate] Step 4: Running two-step card generation...");
+		const result = await generateLesson({
+			genAI,
+			lessonContent,
+			lessonTitle: lesson.title,
+			lessonDescription: lesson.description || "",
 		});
 
-		const cardsText = cardsResult.text || "[]";
-		console.log(`[Generate] Gemini response length: ${cardsText.length}`);
-
-		// 6. Parse the cards
-		console.log("[Generate] Step 5: Parsing cards...");
-		const cleanedJson = cardsText
-			.replace(/```json\n?/g, "")
-			.replace(/```\n?/g, "")
-			.trim();
-
-		interface GeneratedCard {
-			type: "text" | "mc_question";
-			content: {
-				title?: string;
-				body?: string;
-				question?: string;
-				options?: string[];
-				correct_index?: number;
-				explanation?: string;
-			};
-		}
-
-		let cards: GeneratedCard[];
-		try {
-			cards = JSON.parse(cleanedJson);
-			// Limit to max 8 cards
-			if (cards.length > 8) {
-				console.log(`[Generate] Trimming ${cards.length} cards to 8`);
-				cards = cards.slice(0, 8);
+		console.log(`[Generate] Plan: ${result.plan.cards.length} cards planned`);
+		console.log(`[Generate] Generated: ${result.cards.length} cards`);
+		if (result.errors.length > 0) {
+			console.warn(`[Generate] Errors: ${result.errors.length}`);
+			for (const err of result.errors) {
+				console.warn(`  - Card ${err.index}: ${err.error}`);
 			}
-			console.log(`[Generate] Parsed ${cards.length} cards`);
-		} catch (parseError) {
-			console.error("[Generate] Failed to parse cards JSON:", parseError);
-			// Fallback cards
-			cards = [
-				{
-					type: "text",
-					content: {
-						title: lesson.title,
-						body: `This lesson covers: ${lesson.description || "key concepts from the material"}`,
-					},
-				},
-				{
-					type: "mc_question",
-					content: {
-						question: "Did you understand the main concept?",
-						options: [
-							"Yes, I understood it",
-							"I need to review",
-							"It was unclear",
-							"I have questions",
-						],
-						correct_index: 0,
-						explanation: "Great! Let's continue learning.",
-					},
-				},
-			];
 		}
 
-		// 7. Insert cards into database
-		console.log("[Generate] Step 6: Inserting cards into database...");
-		const cardInserts = cards.map((card, index) => ({
+		// 6. Insert cards into database
+		console.log("[Generate] Step 5: Inserting cards into database...");
+		const cardInserts = result.cards.map((card, index) => ({
 			lesson_id: lessonId,
 			type: card.type,
 			order_index: index,
@@ -216,8 +109,8 @@ Return ONLY the JSON array, no markdown code blocks.`,
 
 		console.log(`[Generate] Inserted ${cardInserts.length} cards`);
 
-		// 8. Update lesson status to ready
-		console.log("[Generate] Step 7: Updating lesson status to ready...");
+		// 7. Update lesson status to ready
+		console.log("[Generate] Step 6: Updating lesson status to ready...");
 		await supabase
 			.from("lessons")
 			.update({ status: "ready" })
@@ -226,7 +119,11 @@ Return ONLY the JSON array, no markdown code blocks.`,
 		console.log(
 			`[Generate] ✅ Card generation complete for lesson: ${lessonId}`,
 		);
-		return NextResponse.json({ success: true });
+		return NextResponse.json({
+			success: true,
+			cardsGenerated: result.cards.length,
+			plan: result.plan,
+		});
 	} catch (error) {
 		console.error("[Generate] ❌ Generation error:", error);
 
