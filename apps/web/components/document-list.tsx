@@ -56,17 +56,17 @@ function StatusBadge({ status }: { status: Document["status"] }) {
 		processing: {
 			icon: Loader2,
 			label: "Processing",
-			className: "text-[#FFBC99]",
+			className: "text-app-accent-peach",
 		},
 		completed: {
 			icon: CheckCircle2,
 			label: "Ready",
-			className: "text-[#58CFF5]",
+			className: "text-app-accent-cyan",
 		},
 		failed: {
 			icon: XCircle,
 			label: "Failed",
-			className: "text-[#F9A8C0]",
+			className: "text-app-accent-pink",
 		},
 	};
 
@@ -139,13 +139,13 @@ function DocumentCard({ document, onDelete }: DocumentCardProps) {
 			<div
 				className={cn(
 					"relative flex items-center gap-4 p-4 rounded-2xl transition-all duration-200",
-					"bg-white/90 border border-slate-100 hover:border-[#C9B7FF] hover:shadow-md hover:shadow-[#C9B7FF]/25",
+					"bg-white/90 border border-slate-100 hover:border-app-blob-purple hover:shadow-md hover:shadow-app-blob-purple/25",
 					isDeleting && "opacity-50 pointer-events-none",
 				)}
 			>
 				{/* Icon */}
-				<div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#FAF6FF] border border-[#E4DEF8] flex items-center justify-center">
-					<FileText className="w-6 h-6 text-[#58CFF5]" />
+				<div className="flex-shrink-0 w-12 h-12 rounded-xl bg-app-background border border-app-border-light flex items-center justify-center">
+					<FileText className="w-6 h-6 text-app-accent-cyan" />
 				</div>
 
 				{/* Info */}
@@ -177,7 +177,7 @@ function DocumentCard({ document, onDelete }: DocumentCardProps) {
 						variant="ghost"
 						size="icon"
 						onClick={handleOpenPdf}
-						className="h-8 w-8 text-slate-400 hover:text-[#58CFF5] hover:bg-[#E9F5FF]/60"
+						className="h-8 w-8 text-slate-400 hover:text-app-accent-cyan hover:bg-app-blob-light-blue/60"
 					>
 						<ExternalLink className="w-4 h-4" />
 					</Button>
@@ -186,7 +186,7 @@ function DocumentCard({ document, onDelete }: DocumentCardProps) {
 						size="icon"
 						onClick={handleDelete}
 						disabled={isDeleting}
-						className="h-8 w-8 text-slate-400 hover:text-[#F9A8C0] hover:bg-[#F9C6D0]/40"
+						className="h-8 w-8 text-slate-400 hover:text-app-accent-pink hover:bg-app-blob-pink/40"
 					>
 						<Trash2 className="w-4 h-4" />
 					</Button>
@@ -203,8 +203,8 @@ export function DocumentList({
 	if (documents.length === 0) {
 		return (
 			<div className="text-center py-12 border-2 border-dashed border-slate-100 rounded-2xl bg-white/70">
-				<div className="mx-auto w-16 h-16 rounded-full bg-[#FAF6FF] flex items-center justify-center mb-4 shadow-sm border border-[#E4DEF8]">
-					<FileText className="w-6 h-6 text-[#58CFF5]" />
+				<div className="mx-auto w-16 h-16 rounded-full bg-app-background flex items-center justify-center mb-4 shadow-sm border border-app-border-light">
+					<FileText className="w-6 h-6 text-app-accent-cyan" />
 				</div>
 				<h3 className="text-sm font-medium text-slate-600 mb-1">
 					No documents yet

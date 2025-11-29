@@ -106,9 +106,9 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 				htmlFor="file-upload"
 				className={cn(
 					"group relative flex flex-col items-center justify-center w-full h-[220px] rounded-[28px] transition-all duration-300 cursor-pointer",
-					"bg-white/70 hover:bg-white border-2 border-dashed border-[#E4DEF8] hover:border-[#9FE7FF] backdrop-blur-sm shadow-lg shadow-[#C9B7FF]/15",
+					"bg-white/70 hover:bg-white border-2 border-dashed border-app-border-light hover:border-app-blob-blue backdrop-blur-sm shadow-lg shadow-app-blob-purple/15",
 					isDragOver &&
-						"ring-4 ring-[#C9B7FF]/50 bg-white border-[#9FE7FF] scale-[1.015]",
+						"ring-4 ring-app-blob-purple/50 bg-white border-app-blob-blue scale-[1.015]",
 					isUploading && "pointer-events-none opacity-70",
 				)}
 				onDragOver={handleDragOver}
@@ -128,8 +128,8 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 				<div className="flex flex-col items-center gap-4 p-6 text-center">
 					{isUploading ? (
 						<div className="flex flex-col items-center gap-3 text-slate-600">
-							<div className="p-4 rounded-full bg-[#E0DAFB]/30">
-								<Loader2 className="w-8 h-8 animate-spin text-[#85E9FE]" />
+							<div className="p-4 rounded-full bg-app-bg-variant-1/30">
+								<Loader2 className="w-8 h-8 animate-spin text-app-accent-light-cyan" />
 							</div>
 							<span className="text-lg font-medium">Uploading document...</span>
 						</div>
@@ -139,8 +139,8 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 								className={cn(
 									"p-5 rounded-full transition-colors duration-300",
 									isDragOver
-										? "bg-[#E9F5FF]/60 text-[#58CFF5]"
-										: "bg-[#F3F0FF] text-slate-400 group-hover:bg-[#E9F5FF]/50 group-hover:text-[#58CFF5]",
+										? "bg-app-blob-light-blue/60 text-app-accent-cyan"
+										: "bg-app-bg-variant-2 text-slate-400 group-hover:bg-app-blob-light-blue/50 group-hover:text-app-accent-cyan",
 								)}
 							>
 								<UploadCloud className="w-10 h-10" strokeWidth={1.5} />
