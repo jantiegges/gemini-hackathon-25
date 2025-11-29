@@ -93,7 +93,7 @@ export function CardTemplate({
 	return (
 		<div
 			className={cn(
-				"flex flex-col w-full max-w-4xl mx-auto h-[80vh] bg-white backdrop-blur-2xl rounded-2xl border border-slate-200 p-8 md:p-12 shadow-xl shadow-app-blob-purple/25",
+				"flex flex-col w-full max-w-4xl mx-auto h-[85vh] bg-white backdrop-blur-2xl rounded-2xl border border-slate-200 p-8 md:p-12 shadow-xl shadow-app-blob-purple/25",
 				className,
 			)}
 		>
@@ -159,7 +159,7 @@ export function CardTemplate({
 
 			{/* Action Button */}
 			{showActionButton && (
-				<div className="mt-auto pt-4 sm:pt-6 border-t border-slate-200 dark:border-slate-700">
+				<div className="mt-auto pt-8 sm:pt-10 border-t border-slate-200 dark:border-slate-700">
 					<Button
 						onClick={showActionButton.onClick}
 						disabled={showActionButton.disabled}
