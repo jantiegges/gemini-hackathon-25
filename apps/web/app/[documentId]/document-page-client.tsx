@@ -1,9 +1,9 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
-import type { DocumentStatus } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { DocumentStatus } from "@/lib/types";
 
 interface DocumentPageClientProps {
 	documentId: string;
@@ -45,4 +45,3 @@ export function DocumentPageClient({
 
 	return <>{children}</>;
 }
-
