@@ -1,18 +1,23 @@
 "use client";
 
-import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { ArrowRight, CheckCircle2, XCircle } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { MarkdownContent } from "@/components/markdown-content";
 import type { BlankOption, FillInBlankCardContent } from "@/lib/cards";
+import type { ActionButtonConfig } from "./card-template";
 
 interface FillInBlankCardProps {
 	content: FillInBlankCardContent;
 	onAnswer: (isCorrect: boolean) => void;
+	setActionButton: (config: ActionButtonConfig | null) => void;
 }
 
-export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
+export function FillInBlankCard({
+	content,
+	onAnswer,
+	setActionButton,
+}: FillInBlankCardProps) {
 	const [selectedAnswers, setSelectedAnswers] = useState<
 		Record<string, string>
 	>({});
@@ -49,6 +54,37 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 	const handleContinue = () => {
 		onAnswer(isCorrect);
 	};
+
+	// Update action button based on state
+	useEffect(() => {
+		if (!hasSubmitted) {
+			setActionButton({
+				onClick: handleSubmit,
+				text: "Check Answers",
+				disabled: !allBlanksAnswered,
+				className: cn(
+					"w-full shadow-lg text-sm sm:text-base",
+					allBlanksAnswered
+						? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-amber-500/25"
+						: "bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed",
+				),
+				showArrow: false,
+			});
+		} else {
+			setActionButton({
+				onClick: handleContinue,
+				text: "Continue",
+				className: cn(
+					"w-full shadow-lg text-sm sm:text-base",
+					isCorrect
+						? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-emerald-500/25"
+						: "bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white shadow-slate-500/25",
+				),
+				showArrow: true,
+			});
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [hasSubmitted, allBlanksAnswered, isCorrect, setActionButton]);
 
 	// Render the text with blanks replaced by dropdowns/selections
 	const renderTextWithBlanks = () => {
@@ -112,7 +148,7 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 		<div className="flex flex-col h-full">
 			{/* Text with blanks */}
 			<div className="flex-1 overflow-y-auto min-h-0">
-				<div className="text-sm sm:text-base font-light leading-relaxed text-slate-600/90 dark:text-slate-200 [&_p]:mb-3 sm:[&_p]:mb-4">
+				<div className="text-sm sm:text-base font-light leading-relaxed text-slate-900/95 dark:text-slate-100 [&_p]:mb-3 sm:[&_p]:mb-4">
 					{renderTextWithBlanks()}
 				</div>
 			</div>
@@ -130,15 +166,15 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 					<div className="flex items-center gap-2 mb-2">
 						{isCorrect ? (
 							<>
-								<CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 flex-shrink-0" />
-								<span className="font-semibold text-sm sm:text-base text-emerald-700 dark:text-emerald-300">
+								<CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 flex-shrink-0" />
+								<span className="font-semibold text-sm sm:text-base text-emerald-800 dark:text-emerald-300">
 									All correct!
 								</span>
 							</>
 						) : (
 							<>
-								<XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 flex-shrink-0" />
-								<span className="font-semibold text-sm sm:text-base text-red-700 dark:text-red-300">
+								<XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0" />
+								<span className="font-semibold text-sm sm:text-base text-red-800 dark:text-red-300">
 									Some answers are incorrect
 								</span>
 							</>
@@ -148,47 +184,14 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 						className={cn(
 							"text-xs sm:text-sm font-light [&_p]:mb-0",
 							isCorrect
-								? "text-emerald-600/90 dark:text-emerald-400"
-								: "text-red-600/90 dark:text-red-400",
+								? "text-emerald-800/95 dark:text-emerald-300"
+								: "text-red-800/95 dark:text-red-300",
 						)}
 					>
 						<MarkdownContent content={content.explanation} />
 					</div>
 				</div>
 			)}
-
-			{/* Action button */}
-			<div className="mt-auto pt-4 sm:pt-6 border-t border-slate-200 dark:border-slate-700">
-				{!hasSubmitted ? (
-					<Button
-						onClick={handleSubmit}
-						disabled={!allBlanksAnswered}
-						className={cn(
-							"w-full shadow-lg text-sm sm:text-base",
-							allBlanksAnswered
-								? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-amber-500/25"
-								: "bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed",
-						)}
-						size="lg"
-					>
-						Check Answers
-					</Button>
-				) : (
-					<Button
-						onClick={handleContinue}
-						className={cn(
-							"w-full shadow-lg text-sm sm:text-base",
-							isCorrect
-								? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-emerald-500/25"
-								: "bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white shadow-slate-500/25",
-						)}
-						size="lg"
-					>
-						Continue
-						<ArrowRight className="w-4 h-4 ml-2" />
-					</Button>
-				)}
-			</div>
 		</div>
 	);
 }
@@ -222,11 +225,11 @@ function BlankDropdown({
 					"min-w-[100px] sm:min-w-[120px] px-2 sm:px-3 py-1.5 sm:py-2 rounded-md sm:rounded-lg border-2 text-xs sm:text-sm font-light transition-all min-h-[36px] sm:min-h-0",
 					hasSubmitted
 						? isCorrect
-							? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300"
-							: "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+							? "border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-900 dark:text-emerald-300"
+							: "border-red-600 bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-300"
 						: selected
-							? "border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 active:scale-95"
-							: "border-dashed border-slate-300 dark:border-slate-600 text-slate-500/80 hover:border-slate-400 hover:text-slate-600 active:scale-95",
+							? "border-amber-600 bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 active:scale-95"
+							: "border-dashed border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-slate-400 hover:text-slate-900 active:scale-95",
 				)}
 			>
 				<span className="truncate block max-w-[120px] sm:max-w-none">
@@ -256,9 +259,9 @@ function BlankDropdown({
 									setIsOpen(false);
 								}}
 								className={cn(
-									"w-full px-3 py-2 sm:py-2.5 text-left text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors min-h-[40px] sm:min-h-0",
+									"w-full px-3 py-2 sm:py-2.5 text-left text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors min-h-[40px] sm:min-h-0 text-slate-900 dark:text-slate-100",
 									selected === option.text &&
-										"bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300",
+										"bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300",
 								)}
 							>
 								<MarkdownContent content={option.text} />

@@ -2,9 +2,72 @@
 
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { ArrowLeft, RefreshCw, Trophy } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+
+// Confetti colors matching the app theme
+const CONFETTI_COLORS = [
+	"#5D5FEF", // app-gradient-purple
+	"#FF4F87", // app-gradient-pink
+	"#FF8A3C", // app-gradient-orange
+	"#C9B7FF", // app-blob-purple
+	"#F9C6D0", // app-blob-pink
+	"#FFD599", // app-blob-orange
+];
+
+function Confetti({ passed }: { passed: boolean }) {
+	const [mounted, setMounted] = useState(false);
+	const [particles] = useState(() => {
+		return Array.from({ length: 50 }, (_, i) => {
+			const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+			const left = Math.random() * 100;
+			const delay = Math.random() * 0.5;
+			const duration = 2 + Math.random() * 1;
+			const rotation = Math.random() * 360;
+			const xOffset = (Math.random() - 0.5) * 200;
+			return { i, color, left, delay, duration, rotation, xOffset };
+		});
+	});
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	if (!passed || !mounted) return null;
+
+	const viewportHeight =
+		typeof window !== "undefined" ? window.innerHeight : 800;
+
+	return (
+		<div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+			{particles.map((particle) => (
+				<motion.div
+					key={particle.i}
+					className="absolute w-2 h-2 rounded-sm"
+					style={{
+						backgroundColor: particle.color,
+						left: `${particle.left}%`,
+						top: "-10px",
+					}}
+					initial={{ y: 0, opacity: 1, rotate: 0 }}
+					animate={{
+						y: viewportHeight + 100,
+						opacity: [1, 1, 0],
+						rotate: particle.rotation + 720,
+						x: particle.xOffset,
+					}}
+					transition={{
+						duration: particle.duration,
+						delay: particle.delay,
+						ease: "easeOut",
+					}}
+				/>
+			))}
+		</div>
+	);
+}
 
 interface LessonCompleteProps {
 	documentId: string;
@@ -26,7 +89,10 @@ export function LessonComplete({
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [hasSubmitted, setHasSubmitted] = useState(false);
 
-	const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 100;
+	const score =
+		totalQuestions > 0
+			? Math.round((correctAnswers / totalQuestions) * 100)
+			: 100;
 	const passed = score >= PASSING_SCORE;
 
 	// Submit score to backend
@@ -52,103 +118,119 @@ export function LessonComplete({
 		submitScore();
 	}, [lessonId, score, hasSubmitted]);
 
+	const getPerformanceText = () => {
+		if (passed) {
+			return "Excellent work! You've demonstrated a strong understanding of the material.";
+		} else if (score >= 50) {
+			return "Good effort! You're making progress, but there's still room for improvement.";
+		} else {
+			return "Keep practicing! Review the material and try again to improve your score.";
+		}
+	};
+
 	return (
-		<div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-			{/* Trophy / Result icon */}
-			<div
-				className={cn(
-					"relative mb-8",
-					passed && "animate-bounce",
-				)}
-				style={{ animationDuration: "2s" }}
-			>
-				{/* Glow effect */}
-				{passed && (
-					<div className="absolute inset-0 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 blur-2xl opacity-30 scale-150" />
-				)}
-
-				<div
-					className={cn(
-						"relative w-24 h-24 rounded-full flex items-center justify-center",
-						passed
-							? "bg-gradient-to-br from-yellow-400 to-amber-500 shadow-xl shadow-amber-500/30"
-							: "bg-gradient-to-br from-slate-400 to-slate-500 shadow-xl shadow-slate-500/30",
-					)}
-				>
-					<Trophy
-						className={cn(
-							"w-12 h-12",
-							passed ? "text-white" : "text-slate-200",
-						)}
-					/>
+		<>
+			<Confetti passed={passed} />
+			<div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
+				{/* Subtle animated background circles */}
+				<div className="relative mb-8">
+					{/* Outermost - soft purple */}
+					<div className="absolute inset-0 flex items-center justify-center">
+						<motion.div
+							animate={{
+								scale: [1, 1.2, 1],
+								opacity: [0.2, 0.3, 0.2],
+							}}
+							transition={{
+								duration: 3,
+								repeat: Infinity,
+								ease: "easeInOut",
+							}}
+							className="w-40 h-40 rounded-full bg-app-blob-purple/30 blur-xl"
+						/>
+					</div>
+					{/* Middle - soft pink */}
+					<div className="absolute inset-0 flex items-center justify-center">
+						<motion.div
+							animate={{
+								scale: [1, 1.3, 1],
+								opacity: [0.25, 0.15, 0.25],
+							}}
+							transition={{
+								duration: 3,
+								repeat: Infinity,
+								ease: "easeInOut",
+								delay: 0.5,
+							}}
+							className="w-32 h-32 rounded-full bg-app-blob-pink/40 blur-lg"
+						/>
+					</div>
+					{/* Inner - soft orange */}
+					<div className="absolute inset-0 flex items-center justify-center">
+						<motion.div
+							animate={{
+								scale: [1, 1.1, 1],
+								opacity: [0.3, 0.15, 0.3],
+							}}
+							transition={{
+								duration: 2,
+								repeat: Infinity,
+								ease: "easeInOut",
+								delay: 1,
+							}}
+							className="w-24 h-24 rounded-full bg-app-blob-orange/35 blur-md"
+						/>
+					</div>
 				</div>
-			</div>
 
-			{/* Title */}
-			<h1
-				className={cn(
-					"text-3xl font-bold mb-2",
-					passed
-						? "text-amber-600 dark:text-amber-400"
-						: "text-slate-600 dark:text-slate-400",
-				)}
-			>
-				{passed ? "Lesson Complete!" : "Keep Practicing!"}
-			</h1>
+				{/* Title */}
+				<motion.h1
+					initial={{ opacity: 0, y: 10 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.2, duration: 0.4 }}
+					className="text-3xl md:text-4xl font-display font-semibold text-slate-900/95 mb-4"
+				>
+					{passed ? "Lesson Complete!" : "Keep Practicing!"}
+				</motion.h1>
 
-			{/* Score display */}
-			<div className="mb-6">
-				<div
+				{/* Performance text */}
+				<motion.p
+					initial={{ opacity: 0, y: 10 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.3, duration: 0.4 }}
 					className={cn(
-						"text-6xl font-bold mb-2",
+						"text-base md:text-lg font-light mb-6 max-w-md leading-relaxed",
 						passed
-							? "text-emerald-500"
+							? "text-slate-700/90"
 							: score >= 50
-								? "text-amber-500"
-								: "text-red-500",
+								? "text-slate-600/90"
+								: "text-slate-600/90",
 					)}
 				>
-					{score}%
-				</div>
-				<p className="text-slate-500 dark:text-slate-400">
+					{getPerformanceText()}
+				</motion.p>
+
+				{/* Score details */}
+				<motion.p
+					initial={{ opacity: 0, y: 10 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.4, duration: 0.4 }}
+					className="text-sm font-light text-slate-500/90 mb-8"
+				>
 					{correctAnswers} of {totalQuestions} questions correct
-				</p>
-			</div>
+				</motion.p>
 
-			{/* Message */}
-			<p className="text-slate-600 dark:text-slate-300 mb-8 max-w-md">
-				{passed
-					? "Great job! You've mastered this lesson. Continue to the next one!"
-					: `You need at least ${PASSING_SCORE}% to pass. Review the material and try again!`}
-			</p>
-
-			{/* Actions */}
-			<div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
-				{passed ? (
-					<Button
-						asChild
-						className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/25"
-						size="lg"
-					>
-						<Link href={`/${documentId}`}>
-							<ArrowLeft className="w-4 h-4 mr-2" />
-							Back to Lessons
-						</Link>
-					</Button>
-				) : (
-					<>
-						<Button
-							onClick={onRetry}
-							className="flex-1 bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white shadow-lg shadow-violet-500/25"
-							size="lg"
-						>
-							<RefreshCw className="w-4 h-4 mr-2" />
-							Try Again
-						</Button>
+				{/* Actions */}
+				<motion.div
+					initial={{ opacity: 0, y: 10 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.5, duration: 0.4 }}
+					className="flex flex-col sm:flex-row gap-4 w-full max-w-sm"
+				>
+					{passed ? (
 						<Button
 							asChild
-							variant="outline"
-							className="flex-1"
+							className="flex-1 bg-gradient-to-r from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange hover:opacity-90 text-white shadow-sm"
 							size="lg"
 						>
 							<Link href={`/${documentId}`}>
@@ -156,15 +238,42 @@ export function LessonComplete({
 								Back to Lessons
 							</Link>
 						</Button>
-					</>
+					) : (
+						<>
+							<Button
+								onClick={onRetry}
+								className="flex-1 bg-gradient-to-r from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange hover:opacity-90 text-white shadow-sm"
+								size="lg"
+							>
+								<RefreshCw className="w-4 h-4 mr-2" />
+								Try Again
+							</Button>
+							<Button
+								asChild
+								variant="outline"
+								className="flex-1 border-slate-200 hover:bg-slate-50"
+								size="lg"
+							>
+								<Link href={`/${documentId}`}>
+									<ArrowLeft className="w-4 h-4 mr-2" />
+									Back to Lessons
+								</Link>
+							</Button>
+						</>
+					)}
+				</motion.div>
+
+				{/* Loading indicator */}
+				{isSubmitting && (
+					<motion.p
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						className="mt-4 text-sm font-light text-slate-500/90"
+					>
+						Saving progress...
+					</motion.p>
 				)}
 			</div>
-
-			{/* Loading indicator */}
-			{isSubmitting && (
-				<p className="mt-4 text-sm text-slate-400">Saving progress...</p>
-			)}
-		</div>
+		</>
 	);
 }
-

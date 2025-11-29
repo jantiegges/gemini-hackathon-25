@@ -1,18 +1,23 @@
 "use client";
 
-import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { ArrowRight, CheckCircle2, XCircle } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { MarkdownContent } from "@/components/markdown-content";
 import type { McQuestionCardContent } from "@/lib/types";
+import type { ActionButtonConfig } from "./card-template";
 
 interface McQuestionCardProps {
 	content: McQuestionCardContent;
 	onAnswer: (isCorrect: boolean) => void;
+	setActionButton: (config: ActionButtonConfig | null) => void;
 }
 
-export function McQuestionCard({ content, onAnswer }: McQuestionCardProps) {
+export function McQuestionCard({
+	content,
+	onAnswer,
+	setActionButton,
+}: McQuestionCardProps) {
 	const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 	const [hasAnswered, setHasAnswered] = useState(false);
 
@@ -32,6 +37,37 @@ export function McQuestionCard({ content, onAnswer }: McQuestionCardProps) {
 		onAnswer(isCorrect);
 	};
 
+	// Update action button based on state
+	useEffect(() => {
+		if (!hasAnswered) {
+			setActionButton({
+				onClick: handleSubmit,
+				text: "Check Answer",
+				disabled: selectedIndex === null,
+				className: cn(
+					"w-full shadow-lg text-sm sm:text-base",
+					selectedIndex !== null
+						? "bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white shadow-violet-500/25"
+						: "bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed",
+				),
+				showArrow: false,
+			});
+		} else {
+			setActionButton({
+				onClick: handleContinue,
+				text: "Continue",
+				className: cn(
+					"w-full shadow-lg text-sm sm:text-base",
+					isCorrect
+						? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-emerald-500/25"
+						: "bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white shadow-slate-500/25",
+				),
+				showArrow: true,
+			});
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [hasAnswered, selectedIndex, isCorrect, setActionButton]);
+
 	return (
 		<div className="flex flex-col h-full">
 			{/* Options */}
@@ -46,25 +82,25 @@ export function McQuestionCard({ content, onAnswer }: McQuestionCardProps) {
 					if (hasAnswered) {
 						if (isCorrectOption) {
 							optionStyle =
-								"border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300";
+								"border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-900 dark:text-emerald-300";
 							icon = (
-								<CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+								<CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
 							);
 						} else if (isSelected && !isCorrectOption) {
 							optionStyle =
-								"border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300";
-							icon = <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />;
+								"border-red-600 bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-300";
+							icon = <XCircle className="w-5 h-5 text-red-600 flex-shrink-0" />;
 						} else {
 							optionStyle =
-								"border-slate-200 dark:border-slate-700 opacity-50 text-slate-400/70 dark:text-slate-500";
+								"border-slate-200 dark:border-slate-700 opacity-50 text-slate-600 dark:text-slate-400";
 						}
 					} else {
 						if (isSelected) {
 							optionStyle =
-								"border-violet-500 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 ring-2 ring-violet-500/20";
+								"border-violet-600 bg-violet-50 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 ring-2 ring-violet-500/20";
 						} else {
 							optionStyle =
-								"border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/50";
+								"border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-900 dark:text-slate-100";
 						}
 					}
 
@@ -85,19 +121,19 @@ export function McQuestionCard({ content, onAnswer }: McQuestionCardProps) {
 								className={cn(
 									"flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-xs sm:text-sm font-semibold",
 									hasAnswered && isCorrectOption
-										? "bg-emerald-500 text-white"
+										? "bg-emerald-600 text-white"
 										: hasAnswered && isSelected && !isCorrectOption
-											? "bg-red-500 text-white"
+											? "bg-red-600 text-white"
 											: isSelected
-												? "bg-violet-500 text-white"
-												: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400",
+												? "bg-violet-600 text-white"
+												: "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300",
 								)}
 							>
 								{String.fromCharCode(65 + index)}
 							</span>
 
 							{/* Option text with markdown support */}
-							<span className="flex-1 font-light text-sm sm:text-base text-slate-600/90 dark:text-slate-300 [&_p]:mb-0 [&_.katex]:text-sm sm:[&_.katex]:text-base">
+							<span className="flex-1 font-light text-sm sm:text-base text-slate-900 dark:text-slate-100 [&_p]:mb-0 [&_.katex]:text-sm sm:[&_.katex]:text-base">
 								<MarkdownContent content={option} />
 							</span>
 
@@ -121,15 +157,15 @@ export function McQuestionCard({ content, onAnswer }: McQuestionCardProps) {
 					<div className="flex items-center gap-2 mb-2">
 						{isCorrect ? (
 							<>
-								<CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 flex-shrink-0" />
-								<span className="font-semibold text-sm sm:text-base text-emerald-700 dark:text-emerald-300">
+								<CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 flex-shrink-0" />
+								<span className="font-semibold text-sm sm:text-base text-emerald-800 dark:text-emerald-300">
 									Correct!
 								</span>
 							</>
 						) : (
 							<>
-								<XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 flex-shrink-0" />
-								<span className="font-semibold text-sm sm:text-base text-red-700 dark:text-red-300">
+								<XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0" />
+								<span className="font-semibold text-sm sm:text-base text-red-800 dark:text-red-300">
 									Not quite
 								</span>
 							</>
@@ -139,47 +175,14 @@ export function McQuestionCard({ content, onAnswer }: McQuestionCardProps) {
 						className={cn(
 							"text-xs sm:text-sm font-light [&_p]:mb-0",
 							isCorrect
-								? "text-emerald-600/90 dark:text-emerald-400"
-								: "text-red-600/90 dark:text-red-400",
+								? "text-emerald-800/95 dark:text-emerald-300"
+								: "text-red-800/95 dark:text-red-300",
 						)}
 					>
 						<MarkdownContent content={content.explanation} />
 					</div>
 				</div>
 			)}
-
-			{/* Action button */}
-			<div className="mt-auto pt-4 sm:pt-6 border-t border-slate-200 dark:border-slate-700">
-				{!hasAnswered ? (
-					<Button
-						onClick={handleSubmit}
-						disabled={selectedIndex === null}
-						className={cn(
-							"w-full shadow-lg text-sm sm:text-base",
-							selectedIndex !== null
-								? "bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white shadow-violet-500/25"
-								: "bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed",
-						)}
-						size="lg"
-					>
-						Check Answer
-					</Button>
-				) : (
-					<Button
-						onClick={handleContinue}
-						className={cn(
-							"w-full shadow-lg text-sm sm:text-base",
-							isCorrect
-								? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-emerald-500/25"
-								: "bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white shadow-slate-500/25",
-						)}
-						size="lg"
-					>
-						Continue
-						<ArrowRight className="w-4 h-4 ml-2" />
-					</Button>
-				)}
-			</div>
 		</div>
 	);
 }
