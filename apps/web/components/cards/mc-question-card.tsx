@@ -2,7 +2,7 @@
 
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { ArrowRight, CheckCircle2, HelpCircle, XCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { MarkdownContent } from "@/components/markdown-content";
 import type { McQuestionCardContent } from "@/lib/types";
@@ -34,25 +34,8 @@ export function McQuestionCard({ content, onAnswer }: McQuestionCardProps) {
 
 	return (
 		<div className="flex flex-col h-full">
-			{/* Header */}
-			<div className="flex items-center gap-3 mb-6">
-				<div className="p-2 rounded-lg bg-gradient-to-br from-violet-100 to-violet-200 dark:from-violet-900/30 dark:to-violet-800/30">
-					<HelpCircle className="w-5 h-5 text-violet-600 dark:text-violet-400" />
-				</div>
-				<h2 className="text-lg font-medium text-slate-600 dark:text-slate-400">
-					Question
-				</h2>
-			</div>
-
-			{/* Question */}
-			<div className="mb-6">
-				<div className="text-xl font-semibold text-slate-800 dark:text-white [&_p]:mb-0">
-					<MarkdownContent content={content.question} />
-				</div>
-			</div>
-
 			{/* Options */}
-			<div className="flex-1 space-y-3">
+			<div className="flex-1 space-y-3 overflow-y-auto">
 				{content.options.map((option, index) => {
 					const isSelected = selectedIndex === index;
 					const isCorrectOption = index === content.correct_index;

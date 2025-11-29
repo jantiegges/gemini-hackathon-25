@@ -4,6 +4,7 @@ import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
+import { MarkdownContent } from "@/components/markdown-content";
 
 export type TagColorScheme =
 	| "purple"
@@ -18,6 +19,7 @@ export type TagColorScheme =
 interface ProgressProps {
 	current: number;
 	total: number;
+	onProgressClick?: (index: number) => void;
 }
 
 interface CardTemplateProps {
@@ -57,7 +59,7 @@ export function CardTemplate({
 	return (
 		<div
 			className={cn(
-				"flex flex-col w-full max-w-4xl mx-auto animate-fadeIn h-[80vh] bg-white/85 backdrop-blur-2xl rounded-2xl border border-white/60 p-8 md:p-12 shadow-xl shadow-app-blob-purple/25",
+				"flex flex-col w-full max-w-4xl mx-auto h-[80vh] bg-white backdrop-blur-2xl rounded-2xl border border-slate-200 p-8 md:p-12 shadow-xl shadow-app-blob-purple/25",
 				className,
 			)}
 		>
@@ -67,18 +69,27 @@ export function CardTemplate({
 					{Array.from({ length: progress.total }).map((_, idx) => {
 						const isActive = idx === progress.current - 1;
 						const isCompleted = idx < progress.current - 1;
+						const isClickable = isCompleted && progress.onProgressClick;
 
 						return (
-							<div
+							<button
 								key={`progress-${progress.current}-${idx}`}
+								type="button"
+								onClick={() => {
+									if (isClickable) {
+										progress.onProgressClick?.(idx);
+									}
+								}}
+								disabled={!isClickable}
 								className={cn(
 									"h-1 rounded-full transition-all duration-300",
 									isActive
-										? "w-8 bg-app-gradient-purple"
+										? "w-8 bg-app-gradient-purple cursor-default"
 										: isCompleted
-											? "w-4 bg-app-gradient-pink/60"
-											: "w-4 bg-slate-200/50",
+											? "w-4 bg-app-gradient-pink/60 cursor-pointer hover:w-5 hover:bg-app-gradient-pink/80"
+											: "w-4 bg-slate-200/50 cursor-not-allowed",
 								)}
+								aria-label={`Go to part ${idx + 1}`}
 							/>
 						);
 					})}
@@ -101,9 +112,11 @@ export function CardTemplate({
 			)}
 
 			{/* Title */}
-			<h1 className="text-2xl md:text-3xl font-semibold text-slate-800/90 mb-4">
-				{title}
-			</h1>
+			{title && (
+				<h1 className="text-2xl md:text-3xl font-semibold text-slate-800/90 mb-4 [&_p]:mb-0">
+					<MarkdownContent content={title} />
+				</h1>
+			)}
 
 			{/* Content - Flexible children */}
 			<div className="flex-1 flex flex-col min-h-0">{children}</div>
