@@ -233,10 +233,7 @@ export function LessonComplete({
 							className="flex-1 bg-gradient-to-r from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange hover:opacity-90 text-white shadow-sm"
 							size="lg"
 						>
-							<Link href={`/${documentId}`}>
-								<ArrowLeft className="w-4 h-4 mr-2" />
-								Back to Lessons
-							</Link>
+							<Link href={`/${documentId}`}>Continue learning</Link>
 						</Button>
 					) : (
 						<>
@@ -253,7 +250,7 @@ export function LessonComplete({
 								className="flex-1 border-slate-200 hover:bg-slate-50"
 								size="lg"
 							>
-								<Link href={`/${documentId}`}>Back to Lessons</Link>
+								<Link href={`/${documentId}`}>Back to lessons</Link>
 							</Button>
 						</>
 					)}

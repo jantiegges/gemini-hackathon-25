@@ -62,18 +62,6 @@ export function InteractiveVisualCard({
 		setIsLoading(false);
 	}, []);
 
-	// Restart the visualization by recreating the blob URL
-	const handleRestart = useCallback(() => {
-		if (blobUrl) {
-			URL.revokeObjectURL(blobUrl);
-		}
-		setIsLoading(true);
-		const blob = new Blob([content.html], { type: "text/html" });
-		const url = URL.createObjectURL(blob);
-		setBlobUrl(url);
-		setIsLoading(false);
-	}, [blobUrl, content.html]);
-
 	return (
 		<div className="flex flex-col h-full">
 			{/* Visualization Container */}
@@ -116,11 +104,6 @@ export function InteractiveVisualCard({
 					)}
 				</div>
 			</div>
-
-			{/* Description */}
-			<p className="mt-3 sm:mt-4 text-xs sm:text-sm font-light text-slate-900/95 dark:text-slate-100 text-center px-2">
-				{content.description}
-			</p>
 		</div>
 	);
 }
