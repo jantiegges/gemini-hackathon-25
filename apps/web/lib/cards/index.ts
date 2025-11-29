@@ -35,6 +35,7 @@ export type {
 export type { InfographicCardContent } from "./cards/infographic";
 export type { InteractiveVisualCardContent } from "./cards/interactive-visual";
 export type { McQuestionCardContent } from "./cards/mc-question";
+export type { OralExamCardContent } from "./cards/oral-exam";
 
 // Card content types (for use in components)
 export type { TextCardContent } from "./cards/text";

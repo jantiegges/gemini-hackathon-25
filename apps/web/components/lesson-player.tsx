@@ -9,6 +9,7 @@ import type {
 	InfographicCardContent,
 	InteractiveVisualCardContent,
 	McQuestionCardContent,
+	OralExamCardContent,
 	TextCardContent,
 } from "@/lib/cards";
 import type { Card } from "@/lib/types";
@@ -17,6 +18,7 @@ import { FillInBlankCard } from "./cards/fill-in-blank-card";
 import { InfographicCard } from "./cards/infographic-card";
 import { InteractiveVisualCard } from "./cards/interactive-visual-card";
 import { McQuestionCard } from "./cards/mc-question-card";
+import { OralExamCard } from "./cards/oral-exam-card";
 import { TextCard } from "./cards/text-card";
 import { LessonComplete } from "./lesson-complete";
 
@@ -28,7 +30,7 @@ interface LessonPlayerProps {
 }
 
 // Card types that count as "questions" for scoring
-const QUESTION_CARD_TYPES = ["mc_question", "fill_in_blank"];
+const QUESTION_CARD_TYPES = ["mc_question", "fill_in_blank", "oral_exam"];
 
 export function LessonPlayer({
 	documentId,
@@ -316,6 +318,21 @@ export function LessonPlayer({
 						/>
 					</CardTemplate>
 				);
+			}
+			case "oral_exam": {
+				const content = cardContent as unknown as OralExamCardContent;
+				cardElement = (
+					<CardTemplate
+						key={cardId}
+						title={content.topic}
+						tag="Oral Exam"
+						tagColor="red"
+						progress={progress}
+					>
+						<OralExamCard content={content} onAnswer={handleAnswer} />
+					</CardTemplate>
+				);
+				break;
 			}
 			default: {
 				// Fallback for unknown card types - treat as text
