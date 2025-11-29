@@ -41,6 +41,25 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  
+  /* App-specific colors */
+  --app-background: #FAF6FF;
+  --app-blob-pink: #F9C6D0;
+  --app-blob-purple: #C9B7FF;
+  --app-blob-orange: #FFD599;
+  --app-blob-blue: #9FE7FF;
+  --app-blob-light-blue: #E9F5FF;
+  --app-gradient-purple: #5D5FEF;
+  --app-gradient-pink: #FF4F87;
+  --app-gradient-orange: #FF8A3C;
+  --app-accent-cyan: #58CFF5;
+  --app-accent-light-cyan: #85E9FE;
+  --app-accent-peach: #FFBC99;
+  --app-accent-pink: #F9A8C0;
+  --app-border-light: #E4DEF8;
+  --app-bg-variant-1: #E0DAFB;
+  --app-bg-variant-2: #F3F0FF;
+  --app-selection: #9FE7FF;
 }
 
 .dark {
@@ -115,6 +134,29 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* App-specific color theme variables */
+  --color-app-background: var(--app-background);
+  --color-app-blob-pink: var(--app-blob-pink);
+  --color-app-blob-purple: var(--app-blob-purple);
+  --color-app-blob-orange: var(--app-blob-orange);
+  --color-app-blob-blue: var(--app-blob-blue);
+  --color-app-blob-light-blue: var(--app-blob-light-blue);
+  --color-app-gradient-purple: var(--app-gradient-purple);
+  --color-app-gradient-pink: var(--app-gradient-pink);
+  --color-app-gradient-orange: var(--app-gradient-orange);
+  --color-app-accent-cyan: var(--app-accent-cyan);
+  --color-app-accent-light-cyan: var(--app-accent-light-cyan);
+  --color-app-accent-peach: var(--app-accent-peach);
+  --color-app-accent-pink: var(--app-accent-pink);
+  --color-app-border-light: var(--app-border-light);
+  --color-app-bg-variant-1: var(--app-bg-variant-1);
+  --color-app-bg-variant-2: var(--app-bg-variant-2);
+  --color-app-selection: var(--app-selection);
+  
+  /* Font family variables */
+  --font-family-sans: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  --font-family-mono: var(--font-mono, ui-monospace, monospace);
 }
 
 @layer base {
@@ -123,5 +165,12 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-family-sans);
+  }
+  code, pre {
+    font-family: var(--font-family-mono);
+  }
+  ::selection {
+    background-color: rgba(159, 231, 255, 0.3);
   }
 }

@@ -57,7 +57,7 @@ export function CardTemplate({
 	return (
 		<div
 			className={cn(
-				"flex flex-col w-full max-w-4xl mx-auto animate-fadeIn h-[80vh] bg-white/85 dark:bg-slate-800/85 backdrop-blur-2xl rounded-2xl border border-white/40 dark:border-slate-700/40 p-8 md:p-12 shadow-lg",
+				"flex flex-col w-full max-w-4xl mx-auto animate-fadeIn h-[80vh] bg-white/85 backdrop-blur-2xl rounded-2xl border border-white/60 p-8 md:p-12 shadow-xl shadow-app-blob-purple/25",
 				className,
 			)}
 		>
@@ -72,17 +72,17 @@ export function CardTemplate({
 							<div
 								key={`progress-${progress.current}-${idx}`}
 								className={cn(
-									"h-1.5 rounded-full transition-all duration-300",
+									"h-1 rounded-full transition-all duration-300",
 									isActive
-										? "w-8 bg-violet-500"
+										? "w-8 bg-app-gradient-purple"
 										: isCompleted
-											? "w-4 bg-violet-400"
-											: "w-4 bg-white/30",
+											? "w-4 bg-app-gradient-pink/60"
+											: "w-4 bg-slate-200/50",
 								)}
 							/>
 						);
 					})}
-					<div className="ml-auto text-xs font-medium text-white/80 dark:text-slate-300 uppercase tracking-widest">
+					<div className="ml-auto text-xs font-normal text-slate-500 uppercase tracking-widest">
 						Part {progress.current} of {progress.total}
 					</div>
 				</div>
@@ -92,7 +92,7 @@ export function CardTemplate({
 			{tag && (
 				<span
 					className={cn(
-						"inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider uppercase border rounded-full w-fit backdrop-blur-sm",
+						"inline-block px-3 py-1 mb-4 text-xs font-normal tracking-wider uppercase border rounded-full w-fit backdrop-blur-sm",
 						tagColorClasses[tagColor],
 					)}
 				>
@@ -101,7 +101,7 @@ export function CardTemplate({
 			)}
 
 			{/* Title */}
-			<h1 className="text-2xl md:text-3xl font-serif font-bold text-white dark:text-slate-100 mb-4">
+			<h1 className="text-2xl md:text-3xl font-semibold text-slate-800/90 mb-4">
 				{title}
 			</h1>
 
@@ -110,11 +110,11 @@ export function CardTemplate({
 
 			{/* Continue Button */}
 			{onContinue && (
-				<div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-700">
+				<div className="mt-auto pt-6 border-t border-slate-200/70">
 					<Button
 						onClick={onContinue}
 						className={cn(
-							"w-full shadow-lg bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white shadow-primary-500/25",
+							"w-auto shadow-lg bg-gradient-to-r from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange hover:from-app-gradient-purple/90 hover:via-app-gradient-pink/90 hover:to-app-gradient-orange/90 text-white shadow-app-blob-purple/25",
 							continueButtonClassName,
 						)}
 						size="lg"

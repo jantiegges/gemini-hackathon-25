@@ -24,15 +24,15 @@ export function DocumentsContainer({
 	}, []);
 
 	return (
-		<div className="min-h-screen bg-[#FAF6FF] text-slate-900 font-sans relative selection:bg-[#9FE7FF]/30">
+		<div className="min-h-screen bg-app-background text-slate-900 relative">
 			{/* Fixed Background Gradient */}
 			<div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
 				{/* Mesh Gradient Blobs */}
-				<div className="absolute top-[-15%] left-[-15%] w-[55vw] h-[55vw] bg-[#F9C6D0] rounded-full blur-[140px] opacity-60 mix-blend-multiply animate-blob" />
-				<div className="absolute top-[-5%] right-[-10%] w-[45vw] h-[45vw] bg-[#C9B7FF] rounded-full blur-[130px] opacity-55 mix-blend-multiply animate-blob animation-delay-2000" />
-				<div className="absolute bottom-[-25%] left-[10%] w-[70vw] h-[60vw] bg-[#FFD599] rounded-[45%] blur-[160px] opacity-60 mix-blend-multiply animate-blob animation-delay-4000" />
-				<div className="absolute bottom-[5%] right-[5%] w-[45vw] h-[45vw] bg-[#9FE7FF] rounded-full blur-[140px] opacity-60 mix-blend-multiply" />
-				<div className="absolute top-[25%] left-[40%] w-[35vw] h-[35vw] bg-[#E9F5FF] rounded-full blur-[120px] opacity-50 mix-blend-multiply" />
+				<div className="absolute top-[-15%] left-[-15%] w-[55vw] h-[55vw] bg-app-blob-pink rounded-full blur-[140px] opacity-60 mix-blend-multiply animate-blob" />
+				<div className="absolute top-[-5%] right-[-10%] w-[45vw] h-[45vw] bg-app-blob-purple rounded-full blur-[130px] opacity-55 mix-blend-multiply animate-blob animation-delay-2000" />
+				<div className="absolute bottom-[-25%] left-[10%] w-[70vw] h-[60vw] bg-app-blob-orange rounded-[45%] blur-[160px] opacity-60 mix-blend-multiply animate-blob animation-delay-4000" />
+				<div className="absolute bottom-[5%] right-[5%] w-[45vw] h-[45vw] bg-app-blob-blue rounded-full blur-[140px] opacity-60 mix-blend-multiply" />
+				<div className="absolute top-[25%] left-[40%] w-[35vw] h-[35vw] bg-app-blob-light-blue rounded-full blur-[120px] opacity-50 mix-blend-multiply" />
 			</div>
 
 			{/* Main Content */}
@@ -57,7 +57,7 @@ export function DocumentsContainer({
 											"Study Guides",
 										]}
 										duration={2800}
-										className="text-transparent bg-clip-text bg-gradient-to-r from-[#5D5FEF] via-[#FF4F87] to-[#FF8A3C] "
+										className="text-transparent bg-clip-text bg-gradient-to-r from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange"
 										motionProps={{
 											initial: { opacity: 0, y: 20 },
 											animate: { opacity: 1, y: 0 },
@@ -83,7 +83,7 @@ export function DocumentsContainer({
 
 				{/* Documents List Card Overlay */}
 				<div className="w-full max-w-5xl mx-auto px-6 pb-20">
-					<div className="bg-white/85 backdrop-blur-2xl rounded-3xl shadow-xl shadow-[#C9B7FF]/25 border border-white/60 p-8">
+					<div className="bg-white/85 backdrop-blur-2xl rounded-3xl shadow-xl shadow-app-blob-purple/25 border border-white/60 p-8">
 						{/* Card Header */}
 						<div className="flex items-center justify-between mb-8">
 							<h2 className="text-2xl font-semibold text-slate-800/90">
@@ -101,19 +101,19 @@ export function DocumentsContainer({
 
 						{/* Filters */}
 						<div className="flex items-center gap-4 mb-8 text-sm text-slate-500">
-							<div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200/70 hover:border-[#C9B7FF] hover:shadow-sm transition-all cursor-text w-64">
+							<div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200/70 hover:border-app-blob-purple hover:shadow-sm transition-all cursor-text w-64">
 								<span>🔍</span>
 								<span>Search lessons...</span>
 							</div>
 							<button
 								type="button"
-								className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200/70 hover:border-[#C9B7FF] hover:shadow-sm transition-all"
+								className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200/70 hover:border-app-blob-purple hover:shadow-sm transition-all"
 							>
 								Last edited ▾
 							</button>
 							<button
 								type="button"
-								className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200/70 hover:border-[#C9B7FF] hover:shadow-sm transition-all"
+								className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200/70 hover:border-app-blob-purple hover:shadow-sm transition-all"
 							>
 								All types ▾
 							</button>
