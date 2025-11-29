@@ -49,54 +49,49 @@ export function InfographicCard({ content, onContinue }: InfographicCardProps) {
 
 	return (
 		<div className="flex flex-col h-full">
-			{/* Header */}
-			<div className="flex items-center gap-3 mb-6">
-				<div className="p-2 rounded-lg bg-gradient-to-br from-fuchsia-100 to-fuchsia-200 dark:from-fuchsia-900/30 dark:to-fuchsia-800/30">
-					<ImageIcon className="w-5 h-5 text-fuchsia-600 dark:text-fuchsia-400" />
-				</div>
-				<h2 className="text-xl font-semibold text-slate-800 dark:text-white">
-					{content.title}
-				</h2>
-			</div>
-
-			{/* Image */}
-			<div className="flex-1 flex items-center justify-center">
+			{/* Image Container with hover overlay */}
+			<div className="flex-1 flex items-center justify-center min-h-0 relative group">
 				{isLoading ? (
-					<div className="w-full aspect-[4/3] bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse flex items-center justify-center">
-						<ImageIcon className="w-12 h-12 text-slate-300 dark:text-slate-600" />
+					<div className="w-full h-full bg-slate-100 rounded-xl animate-pulse flex items-center justify-center">
+						<ImageIcon className="w-12 h-12 text-slate-300" />
 					</div>
 				) : error ? (
-					<div className="w-full aspect-[4/3] bg-slate-100 dark:bg-slate-800 rounded-xl flex flex-col items-center justify-center gap-2">
+					<div className="w-full h-full bg-slate-100 rounded-xl flex flex-col items-center justify-center gap-2">
 						<ImageIcon className="w-12 h-12 text-slate-400" />
 						<p className="text-sm text-slate-500">{error}</p>
 					</div>
 				) : (
-					<div className="w-full rounded-xl overflow-hidden shadow-lg relative aspect-[4/3]">
-						<Image
-							src={imageUrl || ""}
-							alt={content.description}
-							fill
-							className="object-contain"
-							unoptimized
-						/>
-					</div>
+					<>
+						<div className="w-full h-full rounded-xl overflow-hidden shadow-lg relative">
+							<Image
+								src={imageUrl || ""}
+								alt={content.description}
+								fill
+								className="object-contain"
+								unoptimized
+							/>
+						</div>
+						{/* Text overlay - appears on hover */}
+						<div className="absolute inset-0 flex flex-col items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all duration-300 rounded-xl pointer-events-none">
+							<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center px-4">
+								{/* Caption */}
+								{content.caption && (
+									<p className="text-sm text-white/90 italic mb-2">
+										{content.caption}
+									</p>
+								)}
+								{/* Description */}
+								<p className="text-base text-white/95 leading-relaxed">
+									{content.description}
+								</p>
+							</div>
+						</div>
+					</>
 				)}
 			</div>
 
-			{/* Caption */}
-			{content.caption && (
-				<p className="mt-4 text-center text-sm text-slate-500 dark:text-slate-400 italic">
-					{content.caption}
-				</p>
-			)}
-
-			{/* Description */}
-			<p className="mt-4 text-slate-600 dark:text-slate-300 text-center">
-				{content.description}
-			</p>
-
 			{/* Continue button */}
-			<div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-700">
+			<div className="mt-auto pt-6 border-t border-slate-200">
 				<Button
 					onClick={onContinue}
 					className="w-full bg-gradient-to-r from-fuchsia-500 to-fuchsia-600 hover:from-fuchsia-600 hover:to-fuchsia-700 text-white shadow-lg shadow-fuchsia-500/25"

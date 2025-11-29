@@ -2,7 +2,7 @@
 
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { ArrowRight, CheckCircle2, PenLine, XCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { MarkdownContent } from "@/components/markdown-content";
 import type { BlankOption, FillInBlankCardContent } from "@/lib/cards";
@@ -110,19 +110,9 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 
 	return (
 		<div className="flex flex-col h-full">
-			{/* Header */}
-			<div className="flex items-center gap-3 mb-6">
-				<div className="p-2 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30">
-					<PenLine className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-				</div>
-				<h2 className="text-lg font-medium text-slate-600 dark:text-slate-400">
-					Fill in the Blanks
-				</h2>
-			</div>
-
 			{/* Text with blanks */}
-			<div className="flex-1">
-				<div className="text-lg leading-relaxed text-slate-700 dark:text-slate-200">
+			<div className="flex-1 overflow-y-auto">
+				<div className="text-base leading-relaxed text-slate-700 dark:text-slate-200 [&_p]:mb-4">
 					{renderTextWithBlanks()}
 				</div>
 			</div>

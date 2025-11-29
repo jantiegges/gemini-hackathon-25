@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { MarkdownContent } from "@/components/markdown-content";
 import type { TextCardContent } from "@/lib/types";
 
@@ -13,19 +13,11 @@ interface TextCardProps {
 export function TextCard({ content, onContinue }: TextCardProps) {
 	return (
 		<div className="flex flex-col h-full">
-			{/* Header */}
-			<div className="flex items-center gap-3 mb-6">
-				<div className="p-2 rounded-lg bg-gradient-to-br from-sky-100 to-sky-200 dark:from-sky-900/30 dark:to-sky-800/30">
-					<BookOpen className="w-5 h-5 text-sky-600 dark:text-sky-400" />
-				</div>
-				<h2 className="text-xl font-semibold text-slate-800 dark:text-white">
-					{content.title}
-				</h2>
-			</div>
-
 			{/* Content */}
 			<div className="flex-1 overflow-y-auto">
-				<MarkdownContent content={content.body} />
+				<div className="text-base leading-relaxed text-slate-700 dark:text-slate-200 [&_p]:mb-4">
+					<MarkdownContent content={content.body} />
+				</div>
 			</div>
 
 			{/* Continue button */}
