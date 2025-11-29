@@ -1,7 +1,7 @@
+import { FileUp } from "lucide-react";
 import { DocumentsContainer } from "@/components/documents-container";
 import { createClient } from "@/lib/supabase/server";
 import type { Document } from "@/lib/types";
-import { FileUp } from "lucide-react";
 
 export default async function Page() {
 	const supabase = await createClient();
@@ -12,7 +12,7 @@ export default async function Page() {
 		.order("created_at", { ascending: false });
 
 	return (
-		<div className="min-h-svh bg-gradient-to-b from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+		<div className="min-h-svh bg-gradient-to-b from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slatse-900 dark:to-slate-950">
 			{/* Decorative background elements */}
 			<div className="fixed inset-0 overflow-hidden pointer-events-none">
 				<div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-emerald-200/30 to-teal-300/20 dark:from-emerald-900/20 dark:to-teal-800/10 blur-3xl" />

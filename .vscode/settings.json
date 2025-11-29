@@ -1,3 +1,64 @@
 {
-  "tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css"
-}
+    "editor.tabSize": 2,
+    "editor.detectIndentation": false,
+    "search.exclude": {
+      "package-lock.json": true,
+      "**/node_modules/**": true,
+      "**/.next/**": true,
+      "**/dist/**": true,
+      "**/build/**": true,
+      "**/.turbo/**": true,
+      "**/.wrangler/**": true,
+      "**/.vercel/**": true,
+      "apps/web/public/sitemaps/**": true,
+      "apps/web/public/uncompressed/**": true,
+    },
+    "editor.defaultFormatter": "biomejs.biome",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.biome": "explicit",
+      "source.organizeImports.biome": "explicit"
+    },
+    "editor.quickSuggestions": {
+      "strings": "on"
+    },
+    "typescript.tsdk": "node_modules/typescript/lib", // Use the workspace version of TypeScript
+    // TypeScript (Native Preview) > Use Tsgo
+    // "typescript.experimental.useTsgo": true,
+    "typescript.enablePromptUseWorkspaceTsdk": true, // For security reasons it's require that users opt into using the workspace version of typescript
+    "typescript.disableAutomaticTypeAcquisition": true,
+    "typescript.tsserver.maxTsServerMemory": 4096,
+    "typescript.preferences.autoImportFileExcludePatterns": [
+      // useRouter should be imported from `next/navigation` instead of `next/router`
+      "next/router.d.ts",
+      "next/dist/client/router.d.ts",
+      // prevent VS Code/TS from ever auto-importing Node's console module
+      "**/@types/node/console.d.ts"
+    ],
+    "javascript.preferences.autoImportFileExcludePatterns": [
+      "**/@types/node/console.d.ts"
+    ],
+    "typescript.preferences.preferTypeOnlyAutoImports": true, // Prefer type-only imports
+    "[yaml]": {
+      "editor.formatOnSave": false
+    },
+    "workbench.editor.customLabels.patterns": {
+      "**/app/**/page.tsx": "${dirname} - page.tsx",
+      "**/app/**/layout.tsx": "${dirname} - layout.tsx",
+      "**/app/**/loading.tsx": "${dirname} - loading.tsx"
+    },
+    "files.associations": {
+      "wrangler.json": "jsonc",
+      "*.css": "tailwindcss"
+    },
+    "deno.enable": true,
+    "deno.enablePaths": ["services/supabase/functions/"],
+    // fix to make intellisense work for v4
+    "tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
+    "[typescript]": {
+      "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[typescriptreact]": {
+      "editor.defaultFormatter": "biomejs.biome"
+    }
+  }
