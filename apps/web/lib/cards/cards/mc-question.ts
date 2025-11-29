@@ -35,7 +35,7 @@ export const mcQuestionCard: CardTypeDefinition = {
 
 	generate: async (context: GeneratorContext): Promise<GeneratedCard> => {
 		const result = await context.genAI.models.generateContent({
-			model: "gemini-2.0-flash",
+			model: "gemini-2.5-flash",
 			contents: [
 				{
 					role: "user",
@@ -80,6 +80,15 @@ No markdown code blocks, just the raw JSON.`,
 
 		try {
 			const content = JSON.parse(cleaned) as McQuestionCardContent;
+			// Ensure strings are actually strings (AI sometimes returns arrays)
+			if (Array.isArray(content.question)) {
+				content.question = content.question.join(" ");
+			}
+			if (Array.isArray(content.explanation)) {
+				content.explanation = (content.explanation as unknown as string[]).join(
+					" ",
+				);
+			}
 			// Validate
 			if (
 				!content.question ||

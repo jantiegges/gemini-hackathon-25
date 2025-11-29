@@ -49,4 +49,6 @@ export { generateCards, generateLesson } from "./generator";
 // Card content types (for use in components)
 export type { TextCardContent } from "./cards/text";
 export type { McQuestionCardContent } from "./cards/mc-question";
+export type { FillInBlankCardContent, BlankOption } from "./cards/fill-in-blank";
+export type { InfographicCardContent } from "./cards/infographic";
 

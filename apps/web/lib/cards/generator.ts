@@ -6,11 +6,14 @@
  */
 
 import type { GoogleGenAI } from "@google/genai";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getCardType } from "./registry";
 import type { GeneratedCard, GeneratorContext, LessonPlan } from "./types";
 
 interface GeneratorInput {
 	genAI: GoogleGenAI;
+	supabase: SupabaseClient;
+	lessonId: string;
 	lessonContent: string;
 	lessonTitle: string;
 	lessonDescription: string;
@@ -29,7 +32,15 @@ interface GenerationResult {
 export async function generateCards(
 	input: GeneratorInput,
 ): Promise<GenerationResult> {
-	const { genAI, lessonContent, lessonTitle, lessonDescription, plan } = input;
+	const {
+		genAI,
+		supabase,
+		lessonId,
+		lessonContent,
+		lessonTitle,
+		lessonDescription,
+		plan,
+	} = input;
 
 	const results: GeneratedCard[] = [];
 	const errors: Array<{ index: number; error: string }> = [];
@@ -48,6 +59,8 @@ export async function generateCards(
 
 		const context: GeneratorContext = {
 			genAI,
+			supabase,
+			lessonId,
 			lessonContent,
 			lessonTitle,
 			lessonDescription,
@@ -93,6 +106,8 @@ export async function generateCards(
  */
 export async function generateLesson(input: {
 	genAI: GoogleGenAI;
+	supabase: SupabaseClient;
+	lessonId: string;
 	lessonContent: string;
 	lessonTitle: string;
 	lessonDescription: string;
@@ -111,4 +126,3 @@ export async function generateLesson(input: {
 
 	return { ...result, plan };
 }
-

@@ -1,11 +1,11 @@
 "use client";
 
-import { MarkdownContent } from "@/components/markdown-content";
-import type { McQuestionCardContent } from "@/lib/types";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowRight, CheckCircle2, HelpCircle, XCircle } from "lucide-react";
 import { useState } from "react";
+import { MarkdownContent } from "@/components/markdown-content";
+import type { McQuestionCardContent } from "@/lib/types";
 
 interface McQuestionCardProps {
 	content: McQuestionCardContent;
@@ -72,8 +72,7 @@ export function McQuestionCard({ content, onAnswer }: McQuestionCardProps) {
 								"border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300";
 							icon = <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />;
 						} else {
-							optionStyle =
-								"border-slate-200 dark:border-slate-700 opacity-50";
+							optionStyle = "border-slate-200 dark:border-slate-700 opacity-50";
 						}
 					} else {
 						if (isSelected) {

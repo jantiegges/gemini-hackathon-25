@@ -30,7 +30,7 @@ export const textCard: CardTypeDefinition = {
 
 	generate: async (context: GeneratorContext): Promise<GeneratedCard> => {
 		const result = await context.genAI.models.generateContent({
-			model: "gemini-2.0-flash",
+			model: "gemini-2.5-flash",
 			contents: [
 				{
 					role: "user",
@@ -70,6 +70,10 @@ No markdown code blocks, just the raw JSON.`,
 
 		try {
 			const content = JSON.parse(cleaned) as TextCardContent;
+			// Ensure body is a string (AI sometimes returns an array)
+			if (Array.isArray(content.body)) {
+				content.body = content.body.join("\n\n");
+			}
 			return { type: "text", content };
 		} catch {
 			// Fallback

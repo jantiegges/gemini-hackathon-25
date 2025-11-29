@@ -1,10 +1,11 @@
 "use client";
 
-import type { LessonStatus } from "@/lib/types";
 import { cn } from "@workspace/ui/lib/utils";
 import { BookOpen, Loader2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { LessonStatus } from "@/lib/types";
 
 interface LessonPageClientProps {
 	lessonId: string;
@@ -27,15 +28,23 @@ export function LessonPageClient({
 	const [status, setStatus] = useState<LessonStatus>(initialStatus);
 	const [currentStep, setCurrentStep] = useState(0);
 	const [error, setError] = useState<string | null>(null);
+	const isGeneratingRef = useRef(false);
 
 	// Trigger generation if pending
 	const triggerGeneration = useCallback(async () => {
+		// Prevent multiple simultaneous generation calls
+		if (isGeneratingRef.current) {
+			console.log("[LessonClient] Generation already in progress, skipping");
+			return;
+		}
 		if (status !== "pending") return;
 
+		isGeneratingRef.current = true;
 		setStatus("generating");
 		setError(null);
 
 		try {
+			console.log("[LessonClient] Starting generation...");
 			const response = await fetch(`/api/lessons/${lessonId}/generate`, {
 				method: "POST",
 			});
@@ -45,20 +54,25 @@ export function LessonPageClient({
 				throw new Error(data.error || "Failed to generate lesson");
 			}
 
+			const data = await response.json();
+			console.log("[LessonClient] Generation complete:", data);
+
 			// Refresh the page to show the cards
 			router.refresh();
 		} catch (err) {
+			console.error("[LessonClient] Generation failed:", err);
 			setError(err instanceof Error ? err.message : "Something went wrong");
 			setStatus("pending");
+			isGeneratingRef.current = false;
 		}
 	}, [lessonId, status, router]);
 
 	// Start generation on mount if pending
 	useEffect(() => {
-		if (status === "pending") {
+		if (initialStatus === "pending" && !isGeneratingRef.current) {
 			triggerGeneration();
 		}
-	}, [status, triggerGeneration]);
+	}, []); // Only run once on mount
 
 	// Animate through steps while generating
 	useEffect(() => {
@@ -71,27 +85,30 @@ export function LessonPageClient({
 		return () => clearInterval(interval);
 	}, [status]);
 
-	// Poll for status if generating (in case page was loaded mid-generation)
+	// Poll for status changes (but don't trigger generation!)
 	useEffect(() => {
 		if (status !== "generating") return;
 
+		const supabase = createClient();
+
 		const checkStatus = async () => {
-			try {
-				const response = await fetch(`/api/lessons/${lessonId}/generate`, {
-					method: "POST",
-				});
-				if (response.ok) {
-					const data = await response.json();
-					if (data.cached) {
-						router.refresh();
-					}
-				}
-			} catch {
-				// Ignore errors during polling
+			const { data } = await supabase
+				.from("lessons")
+				.select("status")
+				.eq("id", lessonId)
+				.single();
+
+			if (data?.status === "ready") {
+				console.log("[LessonClient] Lesson is ready, refreshing...");
+				router.refresh();
+			} else if (data?.status === "pending") {
+				// Generation might have failed, reset
+				setStatus("pending");
+				isGeneratingRef.current = false;
 			}
 		};
 
-		const interval = setInterval(checkStatus, 3000);
+		const interval = setInterval(checkStatus, 2000);
 		return () => clearInterval(interval);
 	}, [lessonId, status, router]);
 
@@ -111,7 +128,11 @@ export function LessonPageClient({
 						{error}
 					</p>
 					<button
-						onClick={triggerGeneration}
+						onClick={() => {
+							isGeneratingRef.current = false;
+							setStatus("pending");
+							triggerGeneration();
+						}}
 						className="px-6 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-white font-medium transition-colors"
 					>
 						Try Again
@@ -178,4 +199,3 @@ export function LessonPageClient({
 		</div>
 	);
 }
-

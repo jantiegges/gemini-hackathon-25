@@ -75,6 +75,8 @@ export async function POST(
 		console.log("[Generate] Step 4: Running two-step card generation...");
 		const result = await generateLesson({
 			genAI,
+			supabase,
+			lessonId,
 			lessonContent,
 			lessonTitle: lesson.title,
 			lessonDescription: lesson.description || "",

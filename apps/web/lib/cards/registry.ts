@@ -8,6 +8,8 @@
  */
 
 import type { CardTypeDefinition } from "./types";
+import { fillInBlankCard } from "./cards/fill-in-blank";
+import { infographicCard } from "./cards/infographic";
 import { mcQuestionCard } from "./cards/mc-question";
 import { textCard } from "./cards/text";
 
@@ -18,15 +20,14 @@ import { textCard } from "./cards/text";
 export const cardTypes: CardTypeDefinition[] = [
 	textCard,
 	mcQuestionCard,
+	fillInBlankCard,
+	infographicCard,
 	// Future card types:
-	// fillBlankCard,
 	// audioCard,
-	// imageCard,
 	// matchingCard,
 	// orderingCard,
 	// flashcardCard,
 	// codeCard,
-	// diagramCard,
 ];
 
 /**
@@ -58,4 +59,3 @@ Output format: ${JSON.stringify(ct.exampleOutput, null, 2)}
 		)
 		.join("\n---\n");
 }
-

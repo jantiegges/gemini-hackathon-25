@@ -6,7 +6,7 @@
  */
 
 import type { GoogleGenAI } from "@google/genai";
-import { getCardTypesDescription, getCardTypeNames } from "./registry";
+import { getCardTypeNames, getCardTypesDescription } from "./registry";
 import type { LessonPlan, PlannedCard } from "./types";
 
 interface PlannerInput {
@@ -27,7 +27,7 @@ export async function planLesson(input: PlannerInput): Promise<LessonPlan> {
 	const availableTypes = getCardTypeNames();
 
 	const result = await genAI.models.generateContent({
-		model: "gemini-2.0-flash",
+		model: "gemini-2.5-flash",
 		contents: [
 			{
 				role: "user",
@@ -118,4 +118,3 @@ function getDefaultPlan(): LessonPlan {
 		],
 	};
 }
-

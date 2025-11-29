@@ -6,6 +6,7 @@
  */
 
 import type { GoogleGenAI } from "@google/genai";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Context passed to card generators
@@ -13,6 +14,10 @@ import type { GoogleGenAI } from "@google/genai";
 export interface GeneratorContext {
 	/** The Gemini AI client */
 	genAI: GoogleGenAI;
+	/** Supabase client for storage operations */
+	supabase: SupabaseClient;
+	/** The lesson ID (for organizing uploads) */
+	lessonId: string;
 	/** Combined content from the lesson's chunks */
 	lessonContent: string;
 	/** The lesson title */
