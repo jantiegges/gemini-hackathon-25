@@ -11,8 +11,6 @@ export async function storeLessons(
 	documentId: string,
 	lessons: LessonData[],
 ): Promise<void> {
-	"use step";
-
 	console.log("[Store] Inserting lessons into database...");
 
 	let prevLessonId: string | null = null;

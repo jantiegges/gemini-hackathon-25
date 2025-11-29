@@ -11,8 +11,6 @@ export async function updateDocumentStatus(
 	documentId: string,
 	status: DocumentStatus,
 ): Promise<void> {
-	"use step";
-
 	console.log(`[Status] Updating document status to: ${status}`);
 
 	const { error } = await supabase
