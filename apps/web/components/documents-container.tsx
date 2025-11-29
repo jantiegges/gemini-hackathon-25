@@ -2,29 +2,33 @@
 
 import { WordRotate } from "@workspace/ui/components/word-rotate";
 import { useCallback, useState } from "react";
-import type { Document } from "@/lib/types";
-import { DocumentList } from "./document-list";
+import type { Document, Lesson } from "@/lib/types";
 import { DocumentUpload } from "./document-upload";
+import { LessonCardsScroll } from "./lesson-cards-scroll";
+
+interface LessonWithImage {
+	lesson: Lesson;
+	documentId: string;
+	imagePath: string | null;
+}
 
 interface DocumentsContainerProps {
 	initialDocuments: Document[];
+	initialLessons?: LessonWithImage[];
 }
 
 export function DocumentsContainer({
 	initialDocuments,
+	initialLessons = [],
 }: DocumentsContainerProps) {
-	const [documents, setDocuments] = useState<Document[]>(initialDocuments);
+	const [lessons] = useState<LessonWithImage[]>(initialLessons);
 
-	const handleUploadComplete = useCallback((newDocument: Document) => {
-		setDocuments((prev) => [newDocument, ...prev]);
-	}, []);
-
-	const handleDocumentDeleted = useCallback((id: string) => {
-		setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+	const handleUploadComplete = useCallback((_newDocument: Document) => {
+		// Document upload handled by redirect
 	}, []);
 
 	return (
-		<div className="min-h-screen bg-white text-slate-900 relative overflow-hidden">
+		<div className="h-screen bg-white text-slate-900 relative overflow-hidden flex flex-col">
 			{/* Subtle 4-color mesh gradient background */}
 			<div className="fixed inset-0 pointer-events-none">
 				{/* Base gradient */}
@@ -40,19 +44,19 @@ export function DocumentsContainer({
 			</div>
 
 			{/* Main Content */}
-			<div className="relative z-10">
+			<div className="relative z-10 flex-1 flex flex-col">
 				{/* Hero Section */}
-				<div className="flex flex-col items-center justify-center min-h-[70vh] w-full px-4 pt-32 pb-40">
-					<div className="w-full max-w-4xl mx-auto text-center space-y-10">
+				<div className="flex flex-col items-center justify-center flex-shrink-0 w-full px-4 pt-16 pb-8">
+					<div className="w-full max-w-4xl mx-auto text-center space-y-8">
 						{/* Header Text */}
-						<div className="space-y-6">
+						<div className="space-y-4">
 							<div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-white/70 border border-white/80 shadow-sm text-xs font-normal text-slate-600/80 backdrop-blur-md mb-2">
 								🍌 New: Auto-generated infographics with Nano Banana
 							</div>
 
-							<h1 className="text-5xl md:text-7xl font-light tracking-[-0.02em] text-slate-900/95">
-								Turn documents into{" "}
-								<span className="inline-block align-baseline">
+							<h1 className="text-4xl md:text-6xl font-display font-semibold tracking-[-0.02em] text-slate-900/95 flex flex-col">
+								<span>Turn documents into</span>
+								<span className="block">
 									<WordRotate
 										words={[
 											"Lessons",
@@ -72,7 +76,7 @@ export function DocumentsContainer({
 								</span>
 							</h1>
 
-							<p className="text-lg md:text-xl text-slate-600/90 font-light max-w-2xl mx-auto leading-relaxed">
+							<p className="text-base md:text-lg text-slate-600/90 font-light max-w-2xl mx-auto leading-relaxed">
 								Upload any PDF and instantly generate Duolingo-style interactive
 								courses.
 							</p>
@@ -85,50 +89,17 @@ export function DocumentsContainer({
 					</div>
 				</div>
 
-				{/* Documents List Card Overlay */}
-				<div className="w-full max-w-5xl mx-auto px-6 pb-20">
-					<div className="bg-white/85 backdrop-blur-2xl rounded-3xl shadow-xl shadow-violet-200/50 border border-slate-200/60 p-8">
-						{/* Card Header */}
-						<div className="flex items-center justify-between mb-8">
+				{/* Lesson Cards Section - Full Width */}
+				{lessons.length > 0 && (
+					<div className="flex-1 flex flex-col justify-center w-full overflow-hidden">
+						<div className="mb-6 px-6">
 							<h2 className="text-2xl font-semibold text-slate-800/90">
 								Your Lessons
 							</h2>
-							<div className="flex items-center gap-4">
-								<button
-									type="button"
-									className="text-sm font-normal text-slate-500 hover:text-slate-800 transition-colors"
-								>
-									View all &gt;
-								</button>
-							</div>
 						</div>
-
-						{/* Filters */}
-						<div className="flex items-center gap-4 mb-8 text-sm text-slate-500">
-							<div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-violet-300 hover:shadow-sm transition-all cursor-text w-64">
-								<span>🔍</span>
-								<span>Search lessons...</span>
-							</div>
-							<button
-								type="button"
-								className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-violet-300 hover:shadow-sm transition-all"
-							>
-								Last edited ▾
-							</button>
-							<button
-								type="button"
-								className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-violet-300 hover:shadow-sm transition-all"
-							>
-								All types ▾
-							</button>
-						</div>
-
-						<DocumentList
-							documents={documents}
-							onDocumentDeleted={handleDocumentDeleted}
-						/>
+						<LessonCardsScroll lessons={lessons} />
 					</div>
-				</div>
+				)}
 			</div>
 		</div>
 	);

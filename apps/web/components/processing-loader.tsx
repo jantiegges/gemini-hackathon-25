@@ -2,27 +2,22 @@
 
 import { cn } from "@workspace/ui/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { BookOpen, Brain, FileText, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const steps = [
 	{
-		icon: FileText,
 		label: "Reading your document",
 		description: "Extracting content from PDF",
 	},
 	{
-		icon: Brain,
 		label: "Understanding the material",
 		description: "Analyzing key concepts",
 	},
 	{
-		icon: BookOpen,
 		label: "Creating lessons",
 		description: "Building your personalized path",
 	},
 	{
-		icon: Sparkles,
 		label: "Finishing touches",
 		description: "Preparing your learning journey",
 	},
@@ -38,8 +33,6 @@ export function ProcessingLoader() {
 
 		return () => clearInterval(interval);
 	}, []);
-
-	const CurrentIcon = steps[currentStep].icon;
 
 	return (
 		<div className="flex flex-col items-center justify-center min-h-svh px-4">
@@ -93,23 +86,78 @@ export function ProcessingLoader() {
 					/>
 				</div>
 
-				{/* Icon container - using app's gradient colors */}
+				{/* Animated loader container - using app's gradient colors */}
 				<div className="relative z-10 flex items-center justify-center w-48 h-48">
 					<motion.div
 						className="p-5 rounded-2xl bg-gradient-to-br from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange"
 						whileHover={{ scale: 1.05 }}
 					>
-						<AnimatePresence mode="wait">
+						<div className="relative w-10 h-10">
+							{/* Rotating outer ring */}
 							<motion.div
-								key={currentStep}
-								initial={{ opacity: 0, scale: 0.5, rotate: -20 }}
-								animate={{ opacity: 1, scale: 1, rotate: 0 }}
-								exit={{ opacity: 0, scale: 0.5, rotate: 20 }}
-								transition={{ duration: 0.3 }}
+								className="absolute inset-0 border-4 border-white/30 rounded-full border-t-white"
+								animate={{ rotate: 360 }}
+								transition={{
+									duration: 1,
+									repeat: Infinity,
+									ease: "linear",
+								}}
+							/>
+							{/* Rotating inner ring (counter-clockwise) */}
+							<motion.div
+								className="absolute inset-2 border-2 border-white/40 rounded-full border-b-white"
+								animate={{ rotate: -360 }}
+								transition={{
+									duration: 1.5,
+									repeat: Infinity,
+									ease: "linear",
+								}}
+							/>
+							{/* Pulsing center dot */}
+							<motion.div
+								className="absolute inset-0 flex items-center justify-center"
+								animate={{
+									scale: [1, 1.3, 1],
+									opacity: [0.7, 1, 0.7],
+								}}
+								transition={{
+									duration: 1.5,
+									repeat: Infinity,
+									ease: "easeInOut",
+								}}
 							>
-								<CurrentIcon className="w-10 h-10 text-white" />
+								<div className="w-3 h-3 rounded-full bg-white shadow-lg shadow-white/50" />
 							</motion.div>
-						</AnimatePresence>
+							{/* Orbiting particles */}
+							<motion.div
+								className="absolute inset-0"
+								style={{ transformOrigin: "center" }}
+								animate={{ rotate: 360 }}
+								transition={{
+									duration: 2,
+									repeat: Infinity,
+									ease: "linear",
+								}}
+							>
+								{[0, 1, 2].map((i) => {
+									const angle = i * 120 - 90; // Start at top, space evenly
+									const radius = 14;
+									const x = Math.cos((angle * Math.PI) / 180) * radius;
+									const y = Math.sin((angle * Math.PI) / 180) * radius;
+									return (
+										<div
+											key={`particle-${i}`}
+											className="absolute w-1.5 h-1.5 rounded-full bg-white/90"
+											style={{
+												top: `calc(50% + ${y}px)`,
+												left: `calc(50% + ${x}px)`,
+												transform: "translate(-50%, -50%)",
+											}}
+										/>
+									);
+								})}
+							</motion.div>
+						</div>
 					</motion.div>
 				</div>
 			</div>
@@ -125,17 +173,17 @@ export function ProcessingLoader() {
 						transition={{ duration: 0.3 }}
 					>
 						<h2 className="text-2xl font-bold text-slate-800 dark:text-white">
-							{steps[currentStep].label}
+							{steps[currentStep]?.label}
 						</h2>
 						<p className="text-slate-500 dark:text-slate-400 mt-2">
-							{steps[currentStep].description}
+							{steps[currentStep]?.description}
 						</p>
 					</motion.div>
 				</AnimatePresence>
 			</div>
 
-			{/* Progress dots - soft pastel colors */}
-			<div className="flex gap-3 mt-8">
+			{/* Progress dots */}
+			<div className="flex gap-2 mt-8">
 				{steps.map((step, index) => (
 					<motion.div
 						key={step.label}
@@ -148,7 +196,8 @@ export function ProcessingLoader() {
 									: "bg-slate-200",
 						)}
 						animate={{
-							width: index === currentStep ? 36 : 10,
+							width: index === currentStep ? 32 : 8,
+							backgroundColor: index === currentStep ? "#8b5cf6" : "#cbd5e1", // fallback colors, actually using classNames
 						}}
 						transition={{ duration: 0.3, ease: "easeOut" }}
 					/>

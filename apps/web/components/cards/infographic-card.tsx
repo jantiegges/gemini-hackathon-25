@@ -1,21 +1,37 @@
 "use client";
 
-import { Button } from "@workspace/ui/components/button";
-import { ArrowRight, ImageIcon } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { InfographicCardContent } from "@/lib/cards";
 import { createClient } from "@/lib/supabase/client";
+import type { ActionButtonConfig } from "./card-template";
 
 interface InfographicCardProps {
 	content: InfographicCardContent;
 	onContinue: () => void;
+	setActionButton: (config: ActionButtonConfig | null) => void;
 }
 
-export function InfographicCard({ content, onContinue }: InfographicCardProps) {
+export function InfographicCard({
+	content,
+	onContinue,
+	setActionButton,
+}: InfographicCardProps) {
 	const [imageUrl, setImageUrl] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+
+	// Set up action button
+	useEffect(() => {
+		setActionButton({
+			onClick: onContinue,
+			text: "Continue",
+			className:
+				"w-full bg-gradient-to-r from-fuchsia-500 to-fuchsia-600 hover:from-fuchsia-600 hover:to-fuchsia-700 text-white shadow-lg shadow-fuchsia-500/25 text-sm sm:text-base",
+			showArrow: true,
+		});
+	}, [onContinue, setActionButton]);
 
 	useEffect(() => {
 		const loadImage = async () => {
@@ -50,56 +66,47 @@ export function InfographicCard({ content, onContinue }: InfographicCardProps) {
 	return (
 		<div className="flex flex-col h-full">
 			{/* Image Container with hover overlay */}
-			<div className="flex-1 flex items-center justify-center min-h-0 relative group">
+			<div className="flex-1 flex items-center justify-center min-h-0 relative group overflow-hidden">
 				{isLoading ? (
-					<div className="w-full h-full bg-slate-100 rounded-xl animate-pulse flex items-center justify-center">
-						<ImageIcon className="w-12 h-12 text-slate-300" />
+					<div className="w-full h-full bg-slate-100 dark:bg-slate-800 rounded-lg sm:rounded-xl animate-pulse flex items-center justify-center">
+						<ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 text-slate-300 dark:text-slate-600" />
 					</div>
 				) : error ? (
-					<div className="w-full h-full bg-slate-100 rounded-xl flex flex-col items-center justify-center gap-2">
-						<ImageIcon className="w-12 h-12 text-slate-400" />
-						<p className="text-sm text-slate-500">{error}</p>
+					<div className="w-full h-full bg-slate-100 dark:bg-slate-800 rounded-lg sm:rounded-xl flex flex-col items-center justify-center gap-2 p-4">
+						<ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 text-slate-400 dark:text-slate-500" />
+						<p className="text-xs sm:text-sm font-light text-slate-900/95 dark:text-slate-100 text-center">
+							{error}
+						</p>
 					</div>
 				) : (
 					<>
-						<div className="w-full h-full rounded-xl overflow-hidden shadow-lg relative">
+						<div className="w-full h-full rounded-lg sm:rounded-xl overflow-hidden shadow-lg relative">
 							<Image
 								src={imageUrl || ""}
 								alt={content.description}
 								fill
 								className="object-contain"
 								unoptimized
+								sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1024px"
 							/>
 						</div>
-						{/* Text overlay - appears on hover */}
-						<div className="absolute inset-0 flex flex-col items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all duration-300 rounded-xl pointer-events-none">
-							<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center px-4">
+						{/* Text overlay - appears on hover/touch */}
+						<div className="absolute inset-0 flex flex-col items-center justify-center bg-black/0 group-hover:bg-black/40 active:bg-black/40 transition-all duration-300 rounded-lg sm:rounded-xl pointer-events-none">
+							<div className="opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 text-center px-3 sm:px-4">
 								{/* Caption */}
 								{content.caption && (
-									<p className="text-sm text-white/90 italic mb-2">
+									<p className="text-xs sm:text-sm font-light text-white italic mb-1 sm:mb-2">
 										{content.caption}
 									</p>
 								)}
 								{/* Description */}
-								<p className="text-base text-white/95 leading-relaxed">
+								<p className="text-sm sm:text-base font-light text-white leading-relaxed">
 									{content.description}
 								</p>
 							</div>
 						</div>
 					</>
 				)}
-			</div>
-
-			{/* Continue button */}
-			<div className="mt-auto pt-6 border-t border-slate-200">
-				<Button
-					onClick={onContinue}
-					className="w-full bg-gradient-to-r from-fuchsia-500 to-fuchsia-600 hover:from-fuchsia-600 hover:to-fuchsia-700 text-white shadow-lg shadow-fuchsia-500/25"
-					size="lg"
-				>
-					Continue
-					<ArrowRight className="w-4 h-4 ml-2" />
-				</Button>
 			</div>
 		</div>
 	);

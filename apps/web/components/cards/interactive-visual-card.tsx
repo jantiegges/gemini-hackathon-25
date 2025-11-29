@@ -1,23 +1,36 @@
 "use client";
 
-import { Button } from "@workspace/ui/components/button";
-import { AlertCircle, ArrowRight, Play } from "lucide-react";
+import { AlertCircle, Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { InteractiveVisualCardContent } from "@/lib/cards";
+import type { ActionButtonConfig } from "./card-template";
 
 interface InteractiveVisualCardProps {
 	content: InteractiveVisualCardContent;
 	onContinue: () => void;
+	setActionButton: (config: ActionButtonConfig | null) => void;
 }
 
 export function InteractiveVisualCard({
 	content,
 	onContinue,
+	setActionButton,
 }: InteractiveVisualCardProps) {
 	const [blobUrl, setBlobUrl] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const iframeRef = useRef<HTMLIFrameElement>(null);
+
+	// Set up action button
+	useEffect(() => {
+		setActionButton({
+			onClick: onContinue,
+			text: "Continue",
+			className:
+				"w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/25 text-sm sm:text-base",
+			showArrow: true,
+		});
+	}, [onContinue, setActionButton]);
 
 	// Create blob URL from HTML content
 	useEffect(() => {
@@ -64,33 +77,33 @@ export function InteractiveVisualCard({
 	return (
 		<div className="flex flex-col h-full">
 			{/* Header */}
-			<div className="flex items-center justify-between mb-4">
-				<div className="flex items-center gap-3">
-					<div className="p-2 rounded-lg bg-gradient-to-br from-emerald-100 to-teal-200 dark:from-emerald-900/30 dark:to-teal-800/30">
-						<Play className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+			<div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+				<div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+					<div className="p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-gradient-to-br from-emerald-100 to-teal-200 dark:from-emerald-900/30 dark:to-teal-800/30 flex-shrink-0">
+						<Play className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
-					<h2 className="text-xl font-semibold text-slate-800 dark:text-white">
+					<h2 className="text-base sm:text-xl font-semibold text-slate-800/90 dark:text-white truncate">
 						{content.title}
 					</h2>
 				</div>
 				<button
 					type="button"
 					onClick={handleRestart}
-					className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+					className="text-xs sm:text-sm font-light text-slate-900/95 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100 transition-colors flex-shrink-0 px-2 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95"
 					title="Restart visualization"
 				>
-					↻ Restart
+					↻ <span className="hidden sm:inline">Restart</span>
 				</button>
 			</div>
 
 			{/* Visualization Container */}
 			<div className="flex-1 flex items-center justify-center min-h-0">
-				<div className="w-full h-full rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700 bg-slate-900 relative">
+				<div className="w-full h-full rounded-lg sm:rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700 bg-slate-900 relative">
 					{isLoading && (
 						<div className="absolute inset-0 flex items-center justify-center bg-slate-900">
-							<div className="flex flex-col items-center gap-3">
-								<div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-								<p className="text-sm text-slate-400">
+							<div className="flex flex-col items-center gap-2 sm:gap-3">
+								<div className="w-6 h-6 sm:w-8 sm:h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+								<p className="text-xs sm:text-sm font-light text-slate-300">
 									Loading visualization...
 								</p>
 							</div>
@@ -98,10 +111,12 @@ export function InteractiveVisualCard({
 					)}
 
 					{error ? (
-						<div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 gap-3">
-							<AlertCircle className="w-10 h-10 text-red-400" />
-							<p className="text-sm text-slate-400">{error}</p>
-							<p className="text-xs text-slate-500 max-w-xs text-center">
+						<div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 gap-2 sm:gap-3 p-4">
+							<AlertCircle className="w-8 h-8 sm:w-10 sm:h-10 text-red-400" />
+							<p className="text-xs sm:text-sm font-light text-slate-300 text-center">
+								{error}
+							</p>
+							<p className="text-xs font-light text-slate-300 max-w-xs text-center">
 								{content.description}
 							</p>
 						</div>
@@ -115,7 +130,7 @@ export function InteractiveVisualCard({
 								sandbox="allow-scripts"
 								onLoad={handleIframeLoad}
 								onError={handleIframeError}
-								style={{ minHeight: "300px" }}
+								style={{ minHeight: "250px" }}
 							/>
 						)
 					)}
@@ -123,21 +138,9 @@ export function InteractiveVisualCard({
 			</div>
 
 			{/* Description */}
-			<p className="mt-4 text-sm text-slate-500 dark:text-slate-400 text-center">
+			<p className="mt-3 sm:mt-4 text-xs sm:text-sm font-light text-slate-900/95 dark:text-slate-100 text-center px-2">
 				{content.description}
 			</p>
-
-			{/* Continue button */}
-			<div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-700">
-				<Button
-					onClick={onContinue}
-					className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/25"
-					size="lg"
-				>
-					Continue
-					<ArrowRight className="w-4 h-4 ml-2" />
-				</Button>
-			</div>
 		</div>
 	);
 }

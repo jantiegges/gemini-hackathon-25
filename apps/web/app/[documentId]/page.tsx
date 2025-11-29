@@ -1,7 +1,8 @@
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AnimatedPageContent } from "@/components/animated-page-content";
+import { BackButtonLink } from "@/components/back-button-link";
 import { LearningPath } from "@/components/learning-path";
 import { ProcessingLoader } from "@/components/processing-loader";
 import { createClient } from "@/lib/supabase/server";
@@ -56,12 +57,7 @@ export default async function DocumentPage({
 			</div>
 
 			{/* Back Button - Top Left */}
-			<Link
-				href="/"
-				className="fixed top-6 left-6 z-20 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors shadow-sm"
-			>
-				<ArrowLeft className="w-5 h-5" />
-			</Link>
+			<BackButtonLink />
 
 			<div className="relative max-w-4xl mx-auto px-6 py-8">
 				<AnimatedPageContent>

@@ -3,7 +3,7 @@
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowRight } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { MarkdownContent } from "@/components/markdown-content";
 
 export type TagColorScheme =
@@ -22,6 +22,14 @@ interface ProgressProps {
 	onProgressClick?: (index: number) => void;
 }
 
+export interface ActionButtonConfig {
+	onClick: () => void;
+	text: string;
+	disabled?: boolean;
+	className?: string;
+	showArrow?: boolean;
+}
+
 interface CardTemplateProps {
 	title: string;
 	tag?: string;
@@ -30,7 +38,12 @@ interface CardTemplateProps {
 	onContinue?: () => void;
 	continueButtonText?: string;
 	continueButtonClassName?: string;
-	children: ReactNode;
+	actionButton?: ActionButtonConfig;
+	children:
+		| ReactNode
+		| ((
+				setActionButton: (config: ActionButtonConfig | null) => void,
+		  ) => ReactNode);
 	className?: string;
 }
 
@@ -53,9 +66,30 @@ export function CardTemplate({
 	onContinue,
 	continueButtonText = "Continue",
 	continueButtonClassName,
+	actionButton,
 	children,
 	className,
 }: CardTemplateProps) {
+	const [internalActionButton, setInternalActionButton] =
+		useState<ActionButtonConfig | null>(null);
+
+	// Determine which button to show: actionButton prop takes precedence, then internal state, then onContinue
+	const showActionButton =
+		actionButton ||
+		internalActionButton ||
+		(onContinue && {
+			onClick: onContinue,
+			text: continueButtonText,
+			className: continueButtonClassName,
+			showArrow: true,
+		});
+
+	// If children is a function, call it with setActionButton
+	const renderedChildren =
+		typeof children === "function"
+			? children(setInternalActionButton)
+			: children;
+
 	return (
 		<div
 			className={cn(
@@ -93,7 +127,7 @@ export function CardTemplate({
 							/>
 						);
 					})}
-					<div className="ml-auto text-xs font-normal text-slate-500 uppercase tracking-widest">
+					<div className="ml-auto text-xs font-light text-slate-600/90 uppercase tracking-widest">
 						Part {progress.current} of {progress.total}
 					</div>
 				</div>
@@ -119,21 +153,26 @@ export function CardTemplate({
 			)}
 
 			{/* Content - Flexible children */}
-			<div className="flex-1 flex flex-col min-h-full">{children}</div>
+			<div className="flex-1 flex flex-col overflow-y-auto min-h-0">
+				{renderedChildren}
+			</div>
 
-			{/* Continue Button */}
-			{onContinue && (
-				<div className="mt-auto pt-6 border-t border-slate-200/70">
+			{/* Action Button */}
+			{showActionButton && (
+				<div className="mt-auto pt-4 sm:pt-6 border-t border-slate-200 dark:border-slate-700">
 					<Button
-						onClick={onContinue}
+						onClick={showActionButton.onClick}
+						disabled={showActionButton.disabled}
 						className={cn(
-							"w-auto shadow-lg bg-gradient-to-r from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange hover:from-app-gradient-purple/90 hover:via-app-gradient-pink/90 hover:to-app-gradient-orange/90 text-white shadow-app-blob-purple/25",
-							continueButtonClassName,
+							"w-full shadow-lg text-sm sm:text-base",
+							showActionButton.className,
 						)}
 						size="lg"
 					>
-						{continueButtonText}
-						<ArrowRight className="w-4 h-4 ml-2" />
+						{showActionButton.text}
+						{showActionButton.showArrow !== false && (
+							<ArrowRight className="w-4 h-4 ml-2" />
+						)}
 					</Button>
 				</div>
 			)}
