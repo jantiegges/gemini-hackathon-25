@@ -115,10 +115,10 @@ export function LessonPageClient({
 	const CurrentIcon = generationSteps[currentStep].icon;
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+		<div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
 			{error ? (
 				<>
-					<div className="p-4 rounded-full bg-red-100 dark:bg-red-900/30 mb-6">
+					<div className="p-4 rounded-full bg-app-blob-pink/30 mb-6">
 						<span className="text-3xl">😕</span>
 					</div>
 					<h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
@@ -133,28 +133,37 @@ export function LessonPageClient({
 							setStatus("pending");
 							triggerGeneration();
 						}}
-						className="px-6 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-white font-medium transition-colors"
+						className="px-6 py-2 rounded-xl bg-gradient-to-r from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange text-white font-medium transition-all hover:shadow-lg hover:shadow-app-gradient-pink/25 hover:scale-[1.02]"
 					>
 						Try Again
 					</button>
 				</>
 			) : (
 				<>
-					{/* Animated background circles */}
+					{/* Animated background circles - using app's soft pastel blobs */}
 					<div className="relative mb-10">
+						{/* Outermost - soft purple */}
 						<div className="absolute inset-0 flex items-center justify-center">
-							<div className="w-36 h-36 rounded-full bg-gradient-to-br from-violet-400/20 to-fuchsia-400/20 animate-pulse" />
+							<div className="w-44 h-44 rounded-full bg-app-blob-purple/30 animate-pulse blur-sm" />
 						</div>
+						{/* Middle - soft pink */}
 						<div className="absolute inset-0 flex items-center justify-center">
 							<div
-								className="w-28 h-28 rounded-full bg-gradient-to-br from-violet-400/30 to-fuchsia-400/30 animate-pulse"
+								className="w-36 h-36 rounded-full bg-app-blob-pink/40 animate-pulse"
 								style={{ animationDelay: "150ms" }}
 							/>
 						</div>
+						{/* Inner - soft orange */}
+						<div className="absolute inset-0 flex items-center justify-center">
+							<div
+								className="w-28 h-28 rounded-full bg-app-blob-orange/30 animate-pulse blur-sm"
+								style={{ animationDelay: "300ms" }}
+							/>
+						</div>
 
-						{/* Icon container */}
-						<div className="relative z-10 flex items-center justify-center w-36 h-36">
-							<div className="p-5 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 shadow-xl shadow-violet-500/25">
+						{/* Icon container - using app's gradient colors */}
+						<div className="relative z-10 flex items-center justify-center w-44 h-44">
+							<div className="p-5 rounded-2xl bg-gradient-to-br from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange">
 								<CurrentIcon
 									className={cn(
 										"w-10 h-10 text-white",
@@ -175,16 +184,18 @@ export function LessonPageClient({
 						</p>
 					</div>
 
-					{/* Progress dots */}
-					<div className="flex gap-2 mt-8">
-						{generationSteps.map((_, index) => (
+					{/* Progress dots - soft pastel colors */}
+					<div className="flex gap-3 mt-8">
+						{generationSteps.map((step, index) => (
 							<div
-								key={index}
+								key={step.label}
 								className={cn(
-									"w-2 h-2 rounded-full transition-all duration-300",
+									"h-2.5 rounded-full transition-all duration-300 ease-out",
 									index === currentStep
-										? "w-8 bg-gradient-to-r from-violet-500 to-fuchsia-500"
-										: "bg-slate-300 dark:bg-slate-600",
+										? "w-9 bg-gradient-to-r from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange shadow-sm shadow-app-gradient-pink/40"
+										: index < currentStep
+											? "w-2.5 bg-app-blob-pink"
+											: "w-2.5 bg-slate-200",
 								)}
 							/>
 						))}

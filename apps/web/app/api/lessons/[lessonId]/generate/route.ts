@@ -54,7 +54,10 @@ export async function POST(
 				.eq("lesson_id", lessonId);
 
 			if (deleteError) {
-				console.error("[Generate] Failed to delete existing cards:", deleteError);
+				console.error(
+					"[Generate] Failed to delete existing cards:",
+					deleteError,
+				);
 				throw new Error("Failed to delete existing cards");
 			}
 			console.log("[Generate] Existing cards deleted");

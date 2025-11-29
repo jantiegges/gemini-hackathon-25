@@ -52,9 +52,12 @@ export function LessonPlayer({
 
 		setIsRegenerating(true);
 		try {
-			const response = await fetch(`/api/lessons/${lessonId}/generate?force=true`, {
-				method: "POST",
-			});
+			const response = await fetch(
+				`/api/lessons/${lessonId}/generate?force=true`,
+				{
+					method: "POST",
+				},
+			);
 
 			if (!response.ok) {
 				const data = await response.json();
@@ -377,7 +380,9 @@ export function LessonPlayer({
 				className="fixed top-6 right-6 z-50 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200/40 text-slate-600 hover:text-slate-900 hover:bg-white/90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
 				title="Regenerate cards with new images"
 			>
-				<RefreshCw className={`w-5 h-5 ${isRegenerating ? "animate-spin" : ""}`} />
+				<RefreshCw
+					className={`w-5 h-5 ${isRegenerating ? "animate-spin" : ""}`}
+				/>
 			</button>
 		</>
 	);

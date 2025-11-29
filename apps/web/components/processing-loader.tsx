@@ -42,28 +42,30 @@ export function ProcessingLoader() {
 	const CurrentIcon = steps[currentStep].icon;
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-			{/* Animated background circles */}
+		<div className="flex flex-col items-center justify-center min-h-svh px-4">
+			{/* Animated background circles - using app's soft pastel blobs */}
 			<div className="relative">
+				{/* Outermost - soft purple */}
 				<div className="absolute inset-0 flex items-center justify-center">
 					<motion.div
 						animate={{
 							scale: [1, 1.2, 1],
-							opacity: [0.2, 0.4, 0.2],
+							opacity: [0.3, 0.5, 0.3],
 						}}
 						transition={{
 							duration: 3,
 							repeat: Infinity,
 							ease: "easeInOut",
 						}}
-						className="w-40 h-40 rounded-full bg-gradient-to-br from-violet-400/20 to-fuchsia-400/20"
+						className="w-48 h-48 rounded-full bg-app-blob-purple/40 blur-sm"
 					/>
 				</div>
+				{/* Middle - soft pink */}
 				<div className="absolute inset-0 flex items-center justify-center">
 					<motion.div
 						animate={{
 							scale: [1, 1.3, 1],
-							opacity: [0.3, 0.1, 0.3],
+							opacity: [0.4, 0.2, 0.4],
 						}}
 						transition={{
 							duration: 3,
@@ -71,9 +73,10 @@ export function ProcessingLoader() {
 							ease: "easeInOut",
 							delay: 0.5,
 						}}
-						className="w-32 h-32 rounded-full bg-gradient-to-br from-violet-400/30 to-fuchsia-400/30"
+						className="w-36 h-36 rounded-full bg-app-blob-pink/50"
 					/>
 				</div>
+				{/* Inner - soft orange */}
 				<div className="absolute inset-0 flex items-center justify-center">
 					<motion.div
 						animate={{
@@ -86,14 +89,14 @@ export function ProcessingLoader() {
 							ease: "easeInOut",
 							delay: 1,
 						}}
-						className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-400/40 to-fuchsia-400/40"
+						className="w-28 h-28 rounded-full bg-app-blob-orange/40 blur-sm"
 					/>
 				</div>
 
-				{/* Icon container */}
-				<div className="relative z-10 flex items-center justify-center w-40 h-40">
+				{/* Icon container - using app's gradient colors */}
+				<div className="relative z-10 flex items-center justify-center w-48 h-48">
 					<motion.div
-						className="p-5 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 shadow-xl shadow-violet-500/25"
+						className="p-5 rounded-2xl bg-gradient-to-br from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange"
 						whileHover={{ scale: 1.05 }}
 					>
 						<AnimatePresence mode="wait">
@@ -131,23 +134,23 @@ export function ProcessingLoader() {
 				</AnimatePresence>
 			</div>
 
-			{/* Progress dots */}
-			<div className="flex gap-2 mt-8">
-				{steps.map((_, index) => (
+			{/* Progress dots - soft pastel colors */}
+			<div className="flex gap-3 mt-8">
+				{steps.map((step, index) => (
 					<motion.div
-						key={index}
+						key={step.label}
 						className={cn(
-							"h-2 rounded-full",
+							"h-2.5 rounded-full",
 							index === currentStep
-								? "bg-gradient-to-r from-violet-500 to-fuchsia-500"
-								: "bg-slate-300 dark:bg-slate-600",
+								? "bg-gradient-to-r from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange shadow-sm shadow-app-gradient-pink/40"
+								: index < currentStep
+									? "bg-app-blob-pink"
+									: "bg-slate-200",
 						)}
 						animate={{
-							width: index === currentStep ? 32 : 8,
-							backgroundColor:
-								index === currentStep ? "#8b5cf6" : "#cbd5e1", // fallback colors, actually using classNames
+							width: index === currentStep ? 36 : 10,
 						}}
-						transition={{ duration: 0.3 }}
+						transition={{ duration: 0.3, ease: "easeOut" }}
 					/>
 				))}
 			</div>
@@ -164,4 +167,3 @@ export function ProcessingLoader() {
 		</div>
 	);
 }
-
