@@ -114,8 +114,26 @@ IMPORTANT:
 			.replace(/```\n?/g, "")
 			.trim();
 
+		// Fix common JSON escaping issues that the AI produces
+		const fixJsonEscaping = (str: string): string => {
+			// Fix unescaped control characters inside JSON string values
+			// This handles cases where AI puts literal newlines/tabs in the HTML string
+			return str.replace(
+				/"html"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"description"|"\s*})/,
+				(match) => {
+					// Within the html value, escape any unescaped control characters
+					return match
+						.replace(/(?<!\\)\t/g, "\\t")
+						.replace(/\r\n/g, "\\n")
+						.replace(/(?<!\\)\r/g, "\\n")
+						.replace(/(?<!\\)\n/g, "\\n");
+				},
+			);
+		};
+
+		let jsonStr = cleaned;
 		try {
-			const content = JSON.parse(cleaned) as InteractiveVisualCardContent;
+			const content = JSON.parse(jsonStr) as InteractiveVisualCardContent;
 
 			// Validate that we have the required fields
 			if (!content.html || !content.title) {
@@ -128,8 +146,32 @@ IMPORTANT:
 			}
 
 			return { type: "interactive_visual", content };
-		} catch (error) {
-			console.error("[InteractiveVisual] Failed to parse response:", error);
+		} catch (firstError) {
+			// First parse failed - try with escape fixing
+			try {
+				jsonStr = fixJsonEscaping(cleaned);
+				const content = JSON.parse(jsonStr) as InteractiveVisualCardContent;
+
+				if (!content.html || !content.title) {
+					throw new Error("Missing required fields");
+				}
+
+				if (!content.html.includes("<!DOCTYPE html>")) {
+					content.html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{margin:0;padding:20px;font-family:system-ui,sans-serif;background:#1a1a2e;color:#fff;min-height:100vh;box-sizing:border-box;}</style></head><body>${content.html}</body></html>`;
+				}
+
+				console.log("[InteractiveVisual] Parsed after fixing escaping");
+				return { type: "interactive_visual", content };
+			} catch (secondError) {
+				console.error(
+					"[InteractiveVisual] Failed to parse response:",
+					firstError,
+				);
+				console.error(
+					"[InteractiveVisual] Also failed after escape fix:",
+					secondError,
+				);
+			}
 
 			// Fallback: create a simple placeholder visualization
 			const fallbackHtml = `<!DOCTYPE html>

@@ -106,7 +106,7 @@ export function CardTemplate({
 			</h1>
 
 			{/* Content - Flexible children */}
-			<div className="flex-1 flex flex-col min-h-0">{children}</div>
+			<div className="flex-1 flex flex-col min-h-full">{children}</div>
 
 			{/* Continue Button */}
 			{onContinue && (
