@@ -115,7 +115,7 @@ export function FillInBlankCard({
 
 			// Add the blank dropdown
 			parts.push(
-				<span key={key++} className="inline-block mx-1 align-middle">
+				<span key={key++} className="inline mx-1 align-middle">
 					<BlankDropdown
 						blankId={blankId}
 						options={options || []}
@@ -222,7 +222,7 @@ function BlankDropdown({
 				onClick={() => !hasSubmitted && setIsOpen(!isOpen)}
 				disabled={hasSubmitted}
 				className={cn(
-					"min-w-[100px] sm:min-w-[120px] px-2 sm:px-3 py-1.5 sm:py-2 rounded-md sm:rounded-lg border-2 text-xs sm:text-sm font-light transition-all min-h-[36px] sm:min-h-0",
+					"min-w-[100px] sm:min-w-[120px] px-2 sm:px-3 py-1.5 sm:py-2 rounded-md sm:rounded-lg border-2 text-xs sm:text-sm font-light transition-all min-h-[36px] sm:min-h-0 whitespace-nowrap",
 					hasSubmitted
 						? isCorrect
 							? "border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-900 dark:text-emerald-300"
