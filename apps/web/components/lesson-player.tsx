@@ -5,6 +5,7 @@ import { type ReactElement, useCallback, useState } from "react";
 import type {
 	FillInBlankCardContent,
 	InfographicCardContent,
+	InteractiveVisualCardContent,
 	McQuestionCardContent,
 	TextCardContent,
 } from "@/lib/cards";
@@ -12,6 +13,7 @@ import type { Card } from "@/lib/types";
 import { CardTemplate } from "./cards/card-template";
 import { FillInBlankCard } from "./cards/fill-in-blank-card";
 import { InfographicCard } from "./cards/infographic-card";
+import { InteractiveVisualCard } from "./cards/interactive-visual-card";
 import { McQuestionCard } from "./cards/mc-question-card";
 import { TextCard } from "./cards/text-card";
 import { LessonComplete } from "./lesson-complete";
@@ -261,6 +263,23 @@ export function LessonPlayer({
 					</CardTemplate>
 				);
 				break;
+			}
+			case "interactive_visual": {
+				const content = cardContent as unknown as InteractiveVisualCardContent;
+				return (
+					<CardTemplate
+						key={cardId}
+						title={content.title}
+						tag="Interactive Visual"
+						tagColor="emerald"
+						progress={progress}
+					>
+						<InteractiveVisualCard
+							content={content}
+							onContinue={handleContinue}
+						/>
+					</CardTemplate>
+				);
 			}
 			default: {
 				// Fallback for unknown card types - treat as text

@@ -20,6 +20,7 @@ import type { Lesson } from "@/lib/types";
 interface LearningPathProps {
 	documentId: string;
 	lessons: Lesson[];
+	documentName: string;
 }
 
 // Light theme pastel colors for lesson nodes
@@ -468,7 +469,7 @@ function ProgressSidebar({
 	);
 }
 
-export function LearningPath({ documentId, lessons }: LearningPathProps) {
+export function LearningPath({ documentId, lessons, documentName }: LearningPathProps) {
 	if (lessons.length === 0) {
 		return (
 			<div className="text-center py-12">
@@ -502,13 +503,17 @@ export function LearningPath({ documentId, lessons }: LearningPathProps) {
 
 	return (
 		<div className="pb-8">
-			<div className="flex gap-8">
+			{/* Document Title */}
+			<h1 className="text-3xl md:text-4xl font-extrabold italic text-center mb-20 bg-gradient-to-r from-violet-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent tracking-tight">
+				{documentName}
+			</h1>
+
+			<div className="flex justify-center">
 				{/* Learning Path */}
-				<div className="flex-1 flex justify-center">
-					<div
-						className="relative"
-						style={{ width: CONTAINER_WIDTH, height: totalHeight }}
-					>
+				<div
+					className="relative"
+					style={{ width: CONTAINER_WIDTH, height: totalHeight }}
+				>
 						{/* Connectors */}
 						<PathConnectors nodeCount={lessons.length} />
 
@@ -582,16 +587,6 @@ export function LearningPath({ documentId, lessons }: LearningPathProps) {
 							</motion.p>
 						</motion.div>
 					</div>
-				</div>
-
-				{/* Progress Sidebar */}
-				<ProgressSidebar
-					completed={completedCount}
-					total={lessons.length}
-					documentId={documentId}
-					nextLessonId={nextLessonId}
-					allCompleted={allCompleted}
-				/>
 			</div>
 		</div>
 	);

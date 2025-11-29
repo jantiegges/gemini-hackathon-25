@@ -56,6 +56,7 @@ Create a lesson plan with 6-8 cards. For each card, specify:
 - End with a summary or final check
 - Each card should focus on ONE specific concept or question
 - Make the focuses specific and actionable
+- Always include an interactive visual card to help the user understand the concept.
 
 ## Output Format
 Return ONLY a JSON object with a "cards" array:
