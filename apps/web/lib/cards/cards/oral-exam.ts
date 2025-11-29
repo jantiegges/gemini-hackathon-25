@@ -110,7 +110,7 @@ export const oralExamCard: CardTypeDefinition = {
 	generate: async (context: GeneratorContext): Promise<GeneratedCard> => {
 		// Generate a focused topic and context for the oral exam
 		const result = await context.genAI.models.generateContent({
-			model: "gemini-2.5-flash",
+			model: "gemini-3-pro-preview",
 			contents: [
 				{
 					role: "user",

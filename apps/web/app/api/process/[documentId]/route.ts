@@ -143,7 +143,7 @@ Return ONLY the JSON array, no wrapping markdown code blocks around the JSON its
 		console.log("[Process] Step 8: Generating lessons with Gemini...");
 		const allContent = pages.join("\n\n---PAGE BREAK---\n\n");
 		const lessonsResult = await genAI.models.generateContent({
-			model: "gemini-2.5-flash",
+			model: "gemini-3-pro-preview",
 			contents: [
 				{
 					role: "user",

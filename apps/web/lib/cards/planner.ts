@@ -27,7 +27,7 @@ export async function planLesson(input: PlannerInput): Promise<LessonPlan> {
 	const availableTypes = getCardTypeNames();
 
 	const result = await genAI.models.generateContent({
-		model: "gemini-2.5-flash",
+		model: "gemini-3-pro-preview",
 		contents: [
 			{
 				role: "user",

@@ -38,7 +38,7 @@ export const textCard: CardTypeDefinition = {
 	generate: async (context: GeneratorContext): Promise<GeneratedCard> => {
 		// Step 1: Generate the text content and image prompt
 		const result = await context.genAI.models.generateContent({
-			model: "gemini-2.5-flash",
+			model: "gemini-3-pro-preview",
 			contents: [
 				{
 					role: "user",
