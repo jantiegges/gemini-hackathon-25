@@ -28,6 +28,22 @@
  * ```
  */
 
+export type {
+	BlankOption,
+	FillInBlankCardContent,
+} from "./cards/fill-in-blank";
+export type { InfographicCardContent } from "./cards/infographic";
+export type { InteractiveVisualCardContent } from "./cards/interactive-visual";
+export type { McQuestionCardContent } from "./cards/mc-question";
+
+// Card content types (for use in components)
+export type { TextCardContent } from "./cards/text";
+// Generator
+export { generateCards, generateLesson } from "./generator";
+// Planner
+export { planLesson } from "./planner";
+// Registry
+export { cardTypes, getCardType, getCardTypeNames } from "./registry";
 // Types
 export type {
 	CardTypeDefinition,
@@ -36,19 +52,3 @@ export type {
 	LessonPlan,
 	PlannedCard,
 } from "./types";
-
-// Registry
-export { cardTypes, getCardType, getCardTypeNames } from "./registry";
-
-// Planner
-export { planLesson } from "./planner";
-
-// Generator
-export { generateCards, generateLesson } from "./generator";
-
-// Card content types (for use in components)
-export type { TextCardContent } from "./cards/text";
-export type { McQuestionCardContent } from "./cards/mc-question";
-export type { FillInBlankCardContent, BlankOption } from "./cards/fill-in-blank";
-export type { InfographicCardContent } from "./cards/infographic";
-
