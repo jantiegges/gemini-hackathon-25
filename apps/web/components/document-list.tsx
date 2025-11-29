@@ -1,7 +1,5 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
-import type { Document } from "@/lib/types";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import {
@@ -15,6 +13,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { Document } from "@/lib/types";
 
 interface DocumentListProps {
 	documents: Document[];
@@ -44,17 +44,20 @@ function StatusBadge({ status }: { status: Document["status"] }) {
 		pending: {
 			icon: Clock,
 			label: "Pending",
-			className: "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
+			className:
+				"bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
 		},
 		processing: {
 			icon: Loader2,
 			label: "Processing",
-			className: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+			className:
+				"bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
 		},
 		completed: {
 			icon: CheckCircle2,
 			label: "Ready",
-			className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+			className:
+				"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
 		},
 		failed: {
 			icon: XCircle,
@@ -141,7 +144,7 @@ function DocumentCard({ document, onDelete }: DocumentCardProps) {
 	);
 
 	return (
-		<Link href={`/${document.id}`}>
+		<Link href={`/${document.id}`} className="block">
 			<div
 				className={cn(
 					"group relative p-5 rounded-xl border transition-all duration-300 cursor-pointer",
@@ -221,7 +224,7 @@ export function DocumentList({
 	}
 
 	return (
-		<div className="space-y-3">
+		<div className="space-y-2">
 			{documents.map((document) => (
 				<DocumentCard
 					key={document.id}
