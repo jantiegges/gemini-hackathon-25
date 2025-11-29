@@ -4,6 +4,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { FileUp, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
+import { processDocument } from "@/lib/actions/process-document";
 import { createClient } from "@/lib/supabase/client";
 import type { Document } from "@/lib/types";
 
@@ -65,10 +66,8 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 
 				onUploadComplete(document);
 
-				// Trigger processing in the background (don't await)
-				fetch(`/api/process/${document.id}`, { method: "POST" }).catch(
-					console.error,
-				);
+				// Trigger processing in the background using server action (don't await)
+				processDocument(document.id).catch(console.error);
 
 				router.push(`/${document.id}`);
 			} catch (err) {
