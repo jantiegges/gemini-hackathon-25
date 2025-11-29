@@ -6,7 +6,14 @@ CREATE TABLE IF NOT EXISTS lessons (
     description TEXT,
     prev_lesson_id UUID REFERENCES lessons(id) ON DELETE SET NULL,
     order_index INTEGER NOT NULL DEFAULT 0,
+    -- Chunk range this lesson covers
+    start_chunk_index INTEGER NOT NULL DEFAULT 0,
+    end_chunk_index INTEGER NOT NULL DEFAULT 0,
+    -- Lesson status for card generation
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'generating', 'ready')),
+    -- Completion tracking
+    is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+    best_score INTEGER, -- percentage 0-100
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-

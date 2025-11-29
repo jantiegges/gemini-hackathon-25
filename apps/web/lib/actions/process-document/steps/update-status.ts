@@ -1,5 +1,3 @@
-"use server";
-
 import type { createClient } from "@/lib/supabase/server";
 import type { DocumentStatus } from "@/lib/types";
 
