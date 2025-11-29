@@ -93,7 +93,7 @@ export function CardTemplate({
 	return (
 		<div
 			className={cn(
-				"flex flex-col w-full max-w-4xl mx-auto h-[85vh] bg-white backdrop-blur-2xl rounded-2xl border border-slate-200 p-8 md:p-12 shadow-xl shadow-app-blob-purple/25",
+				"flex flex-col w-full max-w-4xl mx-auto h-[75vh] bg-white backdrop-blur-2xl rounded-2xl border border-slate-200 p-8 md:p-12 shadow-xl shadow-app-blob-purple/25",
 				className,
 			)}
 		>

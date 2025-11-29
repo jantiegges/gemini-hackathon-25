@@ -3,6 +3,9 @@
 import { cn } from "@workspace/ui/lib/utils";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
 import { MarkdownContent } from "@/components/markdown-content";
 import type { BlankOption, FillInBlankCardContent } from "@/lib/cards";
 import type { ActionButtonConfig } from "./card-template";
@@ -101,8 +104,25 @@ export function FillInBlankCard({
 			if (match.index > lastIndex) {
 				const textBefore = remaining.slice(lastIndex, match.index);
 				parts.push(
-					<span key={key++} className="[&_p]:inline">
-						<MarkdownContent content={textBefore} />
+					<span key={key++} className="inline">
+						<ReactMarkdown
+							remarkPlugins={[remarkMath]}
+							rehypePlugins={[rehypeKatex]}
+							components={{
+								p: ({ children }) => <span className="inline">{children}</span>,
+								strong: ({ children }) => (
+									<strong className="font-semibold">{children}</strong>
+								),
+								em: ({ children }) => <em>{children}</em>,
+								code: ({ children }) => (
+									<code className="text-violet-600 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono">
+										{children}
+									</code>
+								),
+							}}
+						>
+							{textBefore}
+						</ReactMarkdown>
 					</span>,
 				);
 			}
@@ -135,8 +155,25 @@ export function FillInBlankCard({
 		if (lastIndex < content.text.length) {
 			const textAfter = content.text.slice(lastIndex);
 			parts.push(
-				<span key={key++} className="[&_p]:inline">
-					<MarkdownContent content={textAfter} />
+				<span key={key++} className="inline">
+					<ReactMarkdown
+						remarkPlugins={[remarkMath]}
+						rehypePlugins={[rehypeKatex]}
+						components={{
+							p: ({ children }) => <span className="inline">{children}</span>,
+							strong: ({ children }) => (
+								<strong className="font-semibold">{children}</strong>
+							),
+							em: ({ children }) => <em>{children}</em>,
+							code: ({ children }) => (
+								<code className="text-violet-600 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono">
+									{children}
+								</code>
+							),
+						}}
+					>
+						{textAfter}
+					</ReactMarkdown>
 				</span>,
 			);
 		}
@@ -148,7 +185,7 @@ export function FillInBlankCard({
 		<div className="flex flex-col h-full">
 			{/* Text with blanks */}
 			<div className="flex-1 overflow-y-auto min-h-0">
-				<div className="text-sm sm:text-base font-light leading-relaxed text-slate-900/95 dark:text-slate-100 [&_p]:mb-3 sm:[&_p]:mb-4">
+				<div className="text-sm sm:text-base font-light leading-relaxed text-slate-900/95 dark:text-slate-100 break-words [&_*]:inline">
 					{renderTextWithBlanks()}
 				</div>
 			</div>
@@ -217,12 +254,13 @@ function BlankDropdown({
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<div className="relative inline-block">
+		<span className="relative inline align-middle">
 			<button
+				type="button"
 				onClick={() => !hasSubmitted && setIsOpen(!isOpen)}
 				disabled={hasSubmitted}
 				className={cn(
-					"min-w-[100px] sm:min-w-[120px] px-2 sm:px-3 py-1.5 sm:py-2 rounded-md sm:rounded-lg border-2 text-xs sm:text-sm font-light transition-all min-h-[36px] sm:min-h-0 whitespace-nowrap",
+					"inline-block align-middle px-2 sm:px-3 py-1.5 sm:py-2 rounded-md sm:rounded-lg border-2 text-xs sm:text-sm font-light transition-all min-h-[36px] sm:min-h-0",
 					hasSubmitted
 						? isCorrect
 							? "border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-900 dark:text-emerald-300"
@@ -232,11 +270,9 @@ function BlankDropdown({
 							: "border-dashed border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-slate-400 hover:text-slate-900 active:scale-95",
 				)}
 			>
-				<span className="truncate block max-w-[120px] sm:max-w-none">
-					{selected || "Select..."}
-				</span>
+				{selected || "Select..."}
 				{hasSubmitted && !isCorrect && (
-					<span className="ml-1 sm:ml-2 text-xs text-red-500 whitespace-nowrap">
+					<span className="ml-1 sm:ml-2 text-xs text-red-500">
 						→ {correctAnswer}
 					</span>
 				)}
@@ -270,6 +306,6 @@ function BlankDropdown({
 					</div>
 				</>
 			)}
-		</div>
+		</span>
 	);
 }
