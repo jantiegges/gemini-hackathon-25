@@ -11,6 +11,7 @@ import { fillInBlankCard } from "./cards/fill-in-blank";
 import { infographicCard } from "./cards/infographic";
 import { interactiveVisualCard } from "./cards/interactive-visual";
 import { mcQuestionCard } from "./cards/mc-question";
+import { oralExamCard } from "./cards/oral-exam";
 import { textCard } from "./cards/text";
 import type { CardTypeDefinition } from "./types";
 
@@ -24,6 +25,7 @@ export const cardTypes: CardTypeDefinition[] = [
 	fillInBlankCard,
 	infographicCard,
 	interactiveVisualCard,
+	oralExamCard,
 	// Future card types:
 	// audioCard,
 	// matchingCard,
