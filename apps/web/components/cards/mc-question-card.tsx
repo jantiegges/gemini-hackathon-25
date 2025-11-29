@@ -165,7 +165,7 @@ export function McQuestionCard({ content, onAnswer }: McQuestionCardProps) {
 			)}
 
 			{/* Action button */}
-			<div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+			<div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-700">
 				{!hasAnswered ? (
 					<Button
 						onClick={handleSubmit}

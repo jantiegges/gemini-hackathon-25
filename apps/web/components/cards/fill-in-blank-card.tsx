@@ -1,11 +1,11 @@
 "use client";
 
-import { MarkdownContent } from "@/components/markdown-content";
-import type { BlankOption, FillInBlankCardContent } from "@/lib/cards";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowRight, CheckCircle2, PenLine, XCircle } from "lucide-react";
 import { useState } from "react";
+import { MarkdownContent } from "@/components/markdown-content";
+import type { BlankOption, FillInBlankCardContent } from "@/lib/cards";
 
 interface FillInBlankCardProps {
 	content: FillInBlankCardContent;
@@ -53,7 +53,7 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 	// Render the text with blanks replaced by dropdowns/selections
 	const renderTextWithBlanks = () => {
 		const parts: React.ReactNode[] = [];
-		let remaining = content.text;
+		const remaining = content.text;
 		let key = 0;
 
 		const blankRegex = /\{\{(\w+)\}\}/g;
@@ -168,7 +168,7 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 			)}
 
 			{/* Action button */}
-			<div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+			<div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-700">
 				{!hasSubmitted ? (
 					<Button
 						onClick={handleSubmit}
@@ -276,4 +276,3 @@ function BlankDropdown({
 		</div>
 	);
 }
-

@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@workspace/ui/lib/utils";
-import { FileUp, Loader2 } from "lucide-react";
+import { Loader2, UploadCloud } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { processDocument } from "@/lib/actions/process-document";
@@ -30,13 +30,10 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 
 			try {
 				const supabase = createClient();
-
-				// Generate a unique file path
 				const fileExt = file.name.split(".").pop();
 				const fileName = `${crypto.randomUUID()}.${fileExt}`;
 				const filePath = `documents/${fileName}`;
 
-				// Upload to Supabase Storage
 				const { error: uploadError } = await supabase.storage
 					.from("documents")
 					.upload(filePath, file, {
@@ -44,11 +41,8 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 						upsert: false,
 					});
 
-				if (uploadError) {
-					throw new Error(uploadError.message);
-				}
+				if (uploadError) throw new Error(uploadError.message);
 
-				// Insert record into database
 				const { data: document, error: dbError } = await supabase
 					.from("documents")
 					.insert({
@@ -60,15 +54,10 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 					.select()
 					.single();
 
-				if (dbError) {
-					throw new Error(dbError.message);
-				}
+				if (dbError) throw new Error(dbError.message);
 
 				onUploadComplete(document);
-
-				// Trigger processing in the background using server action (don't await)
 				processDocument(document.id).catch(console.error);
-
 				router.push(`/${document.id}`);
 			} catch (err) {
 				setError(err instanceof Error ? err.message : "Upload failed");
@@ -96,13 +85,8 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 			e.preventDefault();
 			e.stopPropagation();
 			setIsDragOver(false);
-
-			const files = Array.from(e.dataTransfer.files);
-			console.error("files", files);
-			const file = files[0];
-			if (file) {
-				uploadFile(file);
-			}
+			const file = e.dataTransfer.files[0];
+			if (file) uploadFile(file);
 		},
 		[uploadFile],
 	);
@@ -110,10 +94,7 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 	const handleFileSelect = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
 			const file = e.target.files?.[0];
-			if (file) {
-				uploadFile(file);
-			}
-			// Reset input so the same file can be selected again
+			if (file) uploadFile(file);
 			e.target.value = "";
 		},
 		[uploadFile],
@@ -124,11 +105,10 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 			<label
 				htmlFor="file-upload"
 				className={cn(
-					"relative flex flex-col items-center justify-center w-full min-h-[200px] rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-300",
-					"bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800",
-					isDragOver
-						? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20 scale-[1.02]"
-						: "border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500",
+					"group relative flex flex-col items-center justify-center w-full h-[220px] rounded-[28px] transition-all duration-300 cursor-pointer",
+					"bg-white/70 hover:bg-white border-2 border-dashed border-app-border-light hover:border-app-blob-blue backdrop-blur-sm shadow-lg shadow-app-blob-purple/15",
+					isDragOver &&
+						"ring-4 ring-app-blob-purple/50 bg-white border-app-blob-blue scale-[1.015]",
 					isUploading && "pointer-events-none opacity-70",
 				)}
 				onDragOver={handleDragOver}
@@ -144,58 +124,46 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 					disabled={isUploading}
 				/>
 
-				<div className="flex flex-col items-center gap-4 p-8 text-center">
+				{/* Dropzone Content */}
+				<div className="flex flex-col items-center gap-4 p-6 text-center">
 					{isUploading ? (
-						<>
-							<div className="p-4 rounded-full bg-emerald-100 dark:bg-emerald-900/50">
-								<Loader2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400 animate-spin" />
+						<div className="flex flex-col items-center gap-3 text-slate-600">
+							<div className="p-4 rounded-full bg-app-bg-variant-1/30">
+								<Loader2 className="w-8 h-8 animate-spin text-app-accent-light-cyan" />
 							</div>
-							<div className="space-y-1">
-								<p className="text-lg font-medium text-slate-700 dark:text-slate-200">
-									Uploading...
-								</p>
-								<p className="text-sm text-slate-500 dark:text-slate-400">
-									Please wait while your file is being uploaded
-								</p>
-							</div>
-						</>
+							<span className="text-lg font-medium">Uploading document...</span>
+						</div>
 					) : (
-						<>
+						<div className="flex flex-col items-center gap-4 group-hover:translate-y-[-2px] transition-transform duration-300">
 							<div
 								className={cn(
-									"p-4 rounded-full transition-colors duration-300",
+									"p-5 rounded-full transition-colors duration-300",
 									isDragOver
-										? "bg-emerald-100 dark:bg-emerald-900/50"
-										: "bg-slate-200 dark:bg-slate-700",
+										? "bg-app-blob-light-blue/60 text-app-accent-cyan"
+										: "bg-app-bg-variant-2 text-slate-400 group-hover:bg-app-blob-light-blue/50 group-hover:text-app-accent-cyan",
 								)}
 							>
-								<FileUp
-									className={cn(
-										"w-8 h-8 transition-colors duration-300",
-										isDragOver
-											? "text-emerald-600 dark:text-emerald-400"
-											: "text-slate-500 dark:text-slate-400",
-									)}
-								/>
+								<UploadCloud className="w-10 h-10" strokeWidth={1.5} />
 							</div>
+
 							<div className="space-y-1">
-								<p className="text-lg font-medium text-slate-700 dark:text-slate-200">
-									{isDragOver ? "Drop your PDF here" : "Drag & drop your PDF"}
+								<p className="text-xl  text-slate-600">
+									{isDragOver
+										? "Drop file here"
+										: "Click to upload or drag and drop"}
 								</p>
-								<p className="text-sm text-slate-500 dark:text-slate-400">
-									or click to browse from your computer
+								<p className="text-sm text-slate-400 font-normal">
+									PDF files up to 50MB
 								</p>
 							</div>
-						</>
+						</div>
 					)}
 				</div>
 			</label>
 
 			{error && (
-				<div className="mt-4 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-					<p className="text-sm text-red-600 dark:text-red-400 text-center">
-						{error}
-					</p>
+				<div className="mt-4 p-4 rounded-xl bg-red-50/80 border border-red-100 text-red-600 text-sm text-center shadow-sm">
+					{error}
 				</div>
 			)}
 		</div>
