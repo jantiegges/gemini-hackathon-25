@@ -1,7 +1,7 @@
 "use client";
 
-import type { Document } from "@/lib/types";
 import { useCallback, useState } from "react";
+import type { Document } from "@/lib/types";
 import { DocumentList } from "./document-list";
 import { DocumentUpload } from "./document-upload";
 
@@ -49,4 +49,3 @@ export function DocumentsContainer({
 		</div>
 	);
 }
-

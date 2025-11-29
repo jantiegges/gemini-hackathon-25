@@ -46,7 +46,7 @@ function DocumentCard({ document, onDelete }: DocumentCardProps) {
 			// Delete from storage first
 			const { error: storageError } = await supabase.storage
 				.from("documents")
-				.remove([document.file_path]);
+				.remove([document.path]);
 
 			if (storageError) {
 				console.error("Storage delete error:", storageError);
@@ -73,12 +73,12 @@ function DocumentCard({ document, onDelete }: DocumentCardProps) {
 		const supabase = createClient();
 		const { data } = supabase.storage
 			.from("documents")
-			.getPublicUrl(document.file_path);
+			.getPublicUrl(document.path);
 
 		if (data?.publicUrl) {
 			window.open(data.publicUrl, "_blank");
 		}
-	}, [document.file_path]);
+	}, [document.path]);
 
 	return (
 		<div
@@ -103,7 +103,7 @@ function DocumentCard({ document, onDelete }: DocumentCardProps) {
 						{document.name}
 					</h3>
 					<div className="flex items-center gap-3 mt-1.5 text-sm text-slate-500 dark:text-slate-400">
-						<span>{formatFileSize(document.file_size)}</span>
+						<span>{formatFileSize(document.size)}</span>
 						<span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
 						<span>{formatDate(document.created_at)}</span>
 					</div>

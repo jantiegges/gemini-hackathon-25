@@ -1,16 +1,18 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
-import type { Document } from "@/lib/types";
 import { cn } from "@workspace/ui/lib/utils";
 import { FileUp, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { Document } from "@/lib/types";
 
 interface DocumentUploadProps {
 	onUploadComplete: (document: Document) => void;
 }
 
 export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
+	const router = useRouter();
 	const [isDragOver, setIsDragOver] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -50,8 +52,8 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 					.from("documents")
 					.insert({
 						name: file.name,
-						file_path: filePath,
-						file_size: file.size,
+						path: filePath,
+						size: file.size,
 						mime_type: file.type,
 					})
 					.select()
@@ -62,13 +64,20 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 				}
 
 				onUploadComplete(document);
+
+				// Trigger processing in the background (don't await)
+				fetch(`/api/process/${document.id}`, { method: "POST" }).catch(
+					console.error,
+				);
+
+				router.push(`/${document.id}`);
 			} catch (err) {
 				setError(err instanceof Error ? err.message : "Upload failed");
 			} finally {
 				setIsUploading(false);
 			}
 		},
-		[onUploadComplete],
+		[onUploadComplete, router],
 	);
 
 	const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -90,8 +99,10 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 			setIsDragOver(false);
 
 			const files = Array.from(e.dataTransfer.files);
-			if (files.length > 0) {
-				uploadFile(files[0]);
+			console.error("files", files);
+			const file = files[0];
+			if (file) {
+				uploadFile(file);
 			}
 		},
 		[uploadFile],
@@ -99,9 +110,9 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 
 	const handleFileSelect = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const files = e.target.files;
-			if (files && files.length > 0) {
-				uploadFile(files[0]);
+			const file = e.target.files?.[0];
+			if (file) {
+				uploadFile(file);
 			}
 			// Reset input so the same file can be selected again
 			e.target.value = "";
@@ -191,4 +202,3 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 		</div>
 	);
 }
-

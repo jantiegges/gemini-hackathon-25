@@ -6,10 +6,13 @@ import type { Document } from "@/lib/types";
 export default async function Page() {
 	const supabase = await createClient();
 
-	const { data: documents } = await supabase
+	const { data: documents, error } = await supabase
 		.from("documents")
 		.select("*")
 		.order("created_at", { ascending: false });
+
+	console.error("data", documents);
+	console.error("error", error);
 
 	return (
 		<div className="min-h-svh bg-gradient-to-b from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slatse-900 dark:to-slate-950">
