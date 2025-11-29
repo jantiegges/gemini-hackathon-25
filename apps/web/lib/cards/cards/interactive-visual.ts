@@ -36,7 +36,7 @@ export const interactiveVisualCard: CardTypeDefinition = {
 
 	generate: async (context: GeneratorContext): Promise<GeneratedCard> => {
 		const result = await context.genAI.models.generateContent({
-			model: "gemini-2.5-flash",
+			model: "gemini-3-pro-preview",
 			contents: [
 				{
 					role: "user",
