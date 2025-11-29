@@ -96,7 +96,7 @@ export function InfographicCard({ content, onContinue }: InfographicCardProps) {
 			</p>
 
 			{/* Continue button */}
-			<div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+			<div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-700">
 				<Button
 					onClick={onContinue}
 					className="w-full bg-gradient-to-r from-fuchsia-500 to-fuchsia-600 hover:from-fuchsia-600 hover:to-fuchsia-700 text-white shadow-lg shadow-fuchsia-500/25"
