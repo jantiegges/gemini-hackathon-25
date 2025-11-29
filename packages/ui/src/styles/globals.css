@@ -157,6 +157,7 @@
   /* Font family variables */
   --font-family-sans: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
   --font-family-mono: var(--font-mono, ui-monospace, monospace);
+  --font-family-display: var(--font-display, ui-sans-serif, system-ui, sans-serif);
 }
 
 @layer base {

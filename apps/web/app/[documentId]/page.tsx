@@ -5,9 +5,8 @@ import { AnimatedPageContent } from "@/components/animated-page-content";
 import { LearningPath } from "@/components/learning-path";
 import { ProcessingLoader } from "@/components/processing-loader";
 import { createClient } from "@/lib/supabase/server";
-import type { Document, Lesson } from "@/lib/types";
+import type { Lesson } from "@/lib/types";
 import { DocumentPageClient } from "./document-page-client";
-import { ViewPdfButton } from "./view-pdf-button";
 
 export default async function DocumentPage({
 	params,
@@ -56,29 +55,13 @@ export default async function DocumentPage({
 				<div className="absolute -bottom-20 -right-20 w-[500px] h-[500px] rounded-full bg-amber-100/50 blur-3xl" />
 			</div>
 
-			{/* Header */}
-			<header className="relative border-b border-slate-200/60 bg-white/50 backdrop-blur-sm">
-				<div className="max-w-4xl mx-auto px-6 py-6">
-					<div className="flex items-start justify-between gap-4">
-						{/* Left side - Back & Title */}
-						<div className="flex-1 min-w-0">
-							<Link
-								href="/"
-								className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors mb-3"
-							>
-								<ArrowLeft className="w-4 h-4" />
-								All Documents
-							</Link>
-							<h1 className="text-2xl md:text-3xl font-bold text-slate-800 truncate">
-								{(document as Document).name}
-							</h1>
-						</div>
-
-						{/* Right side - View PDF Button */}
-						<ViewPdfButton path={(document as Document).path} />
-					</div>
-				</div>
-			</header>
+			{/* Back Button - Top Left */}
+			<Link
+				href="/"
+				className="fixed top-6 left-6 z-20 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors shadow-sm"
+			>
+				<ArrowLeft className="w-5 h-5" />
+			</Link>
 
 			<div className="relative max-w-4xl mx-auto px-6 py-8">
 				<AnimatedPageContent>
@@ -110,7 +93,11 @@ export default async function DocumentPage({
 							</Link>
 						</div>
 					) : (
-						<LearningPath documentId={documentId} lessons={lessons} />
+						<LearningPath
+							documentId={documentId}
+							lessons={lessons}
+							documentName={document.name}
+						/>
 					)}
 				</AnimatedPageContent>
 			</div>
