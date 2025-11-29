@@ -30,12 +30,19 @@ function formatFileSize(bytes: number): string {
 }
 
 function formatDate(dateString: string): string {
-	return new Date(dateString).toLocaleDateString("en-US", {
-		year: "numeric",
+	const date = new Date(dateString);
+	const now = new Date();
+	const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+	if (diffInSeconds < 60) return "Just now";
+	if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+	if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+	if (diffInSeconds < 604800)
+		return `${Math.floor(diffInSeconds / 86400)}d ago`;
+
+	return date.toLocaleDateString("en-US", {
 		month: "short",
 		day: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
 	});
 }
 
@@ -44,41 +51,32 @@ function StatusBadge({ status }: { status: Document["status"] }) {
 		pending: {
 			icon: Clock,
 			label: "Pending",
-			className:
-				"bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
+			className: "text-slate-400",
 		},
 		processing: {
 			icon: Loader2,
 			label: "Processing",
-			className:
-				"bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+			className: "text-[#FFBC99]",
 		},
 		completed: {
 			icon: CheckCircle2,
 			label: "Ready",
-			className:
-				"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+			className: "text-[#58CFF5]",
 		},
 		failed: {
 			icon: XCircle,
 			label: "Failed",
-			className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+			className: "text-[#F9A8C0]",
 		},
 	};
 
-	const { icon: Icon, label, className } = config[status];
+	const { icon: Icon, className } = config[status];
 
 	return (
-		<span
-			className={cn(
-				"inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium",
-				className,
-			)}
-		>
+		<span className={cn("inline-flex items-center", className)}>
 			<Icon
-				className={cn("w-3 h-3", status === "processing" && "animate-spin")}
+				className={cn("w-4 h-4", status === "processing" && "animate-spin")}
 			/>
-			{label}
 		</span>
 	);
 }
@@ -98,25 +96,18 @@ function DocumentCard({ document, onDelete }: DocumentCardProps) {
 			setIsDeleting(true);
 			try {
 				const supabase = createClient();
-
-				// Delete from storage first
 				const { error: storageError } = await supabase.storage
 					.from("documents")
 					.remove([document.path]);
 
-				if (storageError) {
-					console.error("Storage delete error:", storageError);
-				}
+				if (storageError) console.error("Storage delete error:", storageError);
 
-				// Delete from database
 				const { error: dbError } = await supabase
 					.from("documents")
 					.delete()
 					.eq("id", document.id);
 
-				if (dbError) {
-					throw new Error(dbError.message);
-				}
+				if (dbError) throw new Error(dbError.message);
 
 				onDelete(document.id);
 			} catch (err) {
@@ -144,59 +135,61 @@ function DocumentCard({ document, onDelete }: DocumentCardProps) {
 	);
 
 	return (
-		<Link href={`/${document.id}`} className="block">
+		<Link href={`/${document.id}`} className="block group">
 			<div
 				className={cn(
-					"group relative p-5 rounded-xl border transition-all duration-300 cursor-pointer",
-					"bg-white dark:bg-slate-800/50",
-					"border-slate-200 dark:border-slate-700",
-					"hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50",
-					"hover:border-slate-300 dark:hover:border-slate-600",
-					"hover:scale-[1.01]",
+					"relative flex items-center gap-4 p-4 rounded-2xl transition-all duration-200",
+					"bg-white/90 border border-slate-100 hover:border-[#C9B7FF] hover:shadow-md hover:shadow-[#C9B7FF]/25",
 					isDeleting && "opacity-50 pointer-events-none",
 				)}
 			>
-				<div className="flex items-start gap-4">
-					{/* PDF Icon */}
-					<div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-rose-100 to-rose-200 dark:from-rose-900/30 dark:to-rose-800/30">
-						<FileText className="w-6 h-6 text-rose-600 dark:text-rose-400" />
+				{/* Icon */}
+				<div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#FAF6FF] border border-[#E4DEF8] flex items-center justify-center">
+					<FileText className="w-6 h-6 text-[#58CFF5]" />
+				</div>
+
+				{/* Info */}
+				<div className="flex-1 min-w-0 grid grid-cols-12 gap-4 items-center">
+					<div className="col-span-6">
+						<h3 className="font-medium text-slate-800/90 truncate text-base">
+							{document.name}
+						</h3>
+						<p className="text-xs text-slate-400 truncate font-normal mt-0.5">
+							{formatFileSize(document.size)}
+						</p>
 					</div>
 
-					{/* Content */}
-					<div className="flex-1 min-w-0">
-						<div className="flex items-center gap-2 mb-1">
-							<h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">
-								{document.name}
-							</h3>
-							<StatusBadge status={document.status} />
-						</div>
-						<div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
-							<span>{formatFileSize(document.size)}</span>
-							<span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
-							<span>{formatDate(document.created_at)}</span>
-						</div>
+					<div className="col-span-3 text-xs text-slate-500 font-normal flex items-center gap-2">
+						<StatusBadge status={document.status} />
+						<span>
+							{document.status === "completed" ? "Ready" : document.status}
+						</span>
 					</div>
 
-					{/* Actions */}
-					<div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={handleOpenPdf}
-							className="h-8 w-8 text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400"
-						>
-							<ExternalLink className="w-4 h-4" />
-						</Button>
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={handleDelete}
-							disabled={isDeleting}
-							className="h-8 w-8 text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400"
-						>
-							<Trash2 className="w-4 h-4" />
-						</Button>
+					<div className="col-span-3 text-right text-xs text-slate-400 font-normal">
+						{formatDate(document.created_at)}
 					</div>
+				</div>
+
+				{/* Actions */}
+				<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-2">
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={handleOpenPdf}
+						className="h-8 w-8 text-slate-400 hover:text-[#58CFF5] hover:bg-[#E9F5FF]/60"
+					>
+						<ExternalLink className="w-4 h-4" />
+					</Button>
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={handleDelete}
+						disabled={isDeleting}
+						className="h-8 w-8 text-slate-400 hover:text-[#F9A8C0] hover:bg-[#F9C6D0]/40"
+					>
+						<Trash2 className="w-4 h-4" />
+					</Button>
 				</div>
 			</div>
 		</Link>
@@ -209,22 +202,20 @@ export function DocumentList({
 }: DocumentListProps) {
 	if (documents.length === 0) {
 		return (
-			<div className="text-center py-12">
-				<div className="mx-auto w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
-					<FileText className="w-8 h-8 text-slate-400 dark:text-slate-500" />
+			<div className="text-center py-12 border-2 border-dashed border-slate-100 rounded-2xl bg-white/70">
+				<div className="mx-auto w-16 h-16 rounded-full bg-[#FAF6FF] flex items-center justify-center mb-4 shadow-sm border border-[#E4DEF8]">
+					<FileText className="w-6 h-6 text-[#58CFF5]" />
 				</div>
-				<h3 className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-1">
+				<h3 className="text-sm font-medium text-slate-600 mb-1">
 					No documents yet
 				</h3>
-				<p className="text-sm text-slate-500 dark:text-slate-400">
-					Upload your first PDF to get started
-				</p>
+				<p className="text-xs text-slate-400">Upload your first PDF above</p>
 			</div>
 		);
 	}
 
 	return (
-		<div className="space-y-2">
+		<div className="space-y-3">
 			{documents.map((document) => (
 				<DocumentCard
 					key={document.id}
