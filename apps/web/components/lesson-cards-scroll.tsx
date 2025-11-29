@@ -5,14 +5,13 @@ import { useEffect, useRef } from "react";
 import { LessonCard } from "./lesson-card";
 import type { Lesson } from "@/lib/types";
 
-interface LessonWithImage {
+interface LessonWithDocument {
 	lesson: Lesson;
 	documentId: string;
-	imagePath: string | null;
 }
 
 interface LessonCardsScrollProps {
-	lessons: LessonWithImage[];
+	lessons: LessonWithDocument[];
 }
 
 export function LessonCardsScroll({ lessons }: LessonCardsScrollProps) {
@@ -50,12 +49,11 @@ export function LessonCardsScroll({ lessons }: LessonCardsScrollProps) {
 				className="overflow-x-auto scrollbar-hide"
 			>
 				<div className="flex gap-4 min-w-max pr-0 pl-0">
-					{lessons.map(({ lesson, documentId, imagePath }) => (
+					{lessons.map(({ lesson, documentId }) => (
 						<LessonCard
 							key={lesson.id}
 							lesson={lesson}
 							documentId={documentId}
-							imagePath={imagePath}
 						/>
 					))}
 				</div>
