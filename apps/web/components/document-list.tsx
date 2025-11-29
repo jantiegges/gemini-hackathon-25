@@ -4,7 +4,16 @@ import { createClient } from "@/lib/supabase/client";
 import type { Document } from "@/lib/types";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { ExternalLink, FileText, Trash2 } from "lucide-react";
+import {
+	CheckCircle2,
+	Clock,
+	ExternalLink,
+	FileText,
+	Loader2,
+	Trash2,
+	XCircle,
+} from "lucide-react";
+import Link from "next/link";
 import { useCallback, useState } from "react";
 
 interface DocumentListProps {
@@ -30,6 +39,47 @@ function formatDate(dateString: string): string {
 	});
 }
 
+function StatusBadge({ status }: { status: Document["status"] }) {
+	const config = {
+		pending: {
+			icon: Clock,
+			label: "Pending",
+			className: "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
+		},
+		processing: {
+			icon: Loader2,
+			label: "Processing",
+			className: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+		},
+		completed: {
+			icon: CheckCircle2,
+			label: "Ready",
+			className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+		},
+		failed: {
+			icon: XCircle,
+			label: "Failed",
+			className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+		},
+	};
+
+	const { icon: Icon, label, className } = config[status];
+
+	return (
+		<span
+			className={cn(
+				"inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium",
+				className,
+			)}
+		>
+			<Icon
+				className={cn("w-3 h-3", status === "processing" && "animate-spin")}
+			/>
+			{label}
+		</span>
+	);
+}
+
 interface DocumentCardProps {
 	document: Document;
 	onDelete: (id: string) => void;
@@ -38,103 +88,122 @@ interface DocumentCardProps {
 function DocumentCard({ document, onDelete }: DocumentCardProps) {
 	const [isDeleting, setIsDeleting] = useState(false);
 
-	const handleDelete = useCallback(async () => {
-		setIsDeleting(true);
-		try {
+	const handleDelete = useCallback(
+		async (e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			setIsDeleting(true);
+			try {
+				const supabase = createClient();
+
+				// Delete from storage first
+				const { error: storageError } = await supabase.storage
+					.from("documents")
+					.remove([document.path]);
+
+				if (storageError) {
+					console.error("Storage delete error:", storageError);
+				}
+
+				// Delete from database
+				const { error: dbError } = await supabase
+					.from("documents")
+					.delete()
+					.eq("id", document.id);
+
+				if (dbError) {
+					throw new Error(dbError.message);
+				}
+
+				onDelete(document.id);
+			} catch (err) {
+				console.error("Delete error:", err);
+				setIsDeleting(false);
+			}
+		},
+		[document, onDelete],
+	);
+
+	const handleOpenPdf = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
 			const supabase = createClient();
-
-			// Delete from storage first
-			const { error: storageError } = await supabase.storage
+			const { data } = supabase.storage
 				.from("documents")
-				.remove([document.path]);
+				.getPublicUrl(document.path);
 
-			if (storageError) {
-				console.error("Storage delete error:", storageError);
+			if (data?.publicUrl) {
+				window.open(data.publicUrl, "_blank");
 			}
-
-			// Delete from database
-			const { error: dbError } = await supabase
-				.from("documents")
-				.delete()
-				.eq("id", document.id);
-
-			if (dbError) {
-				throw new Error(dbError.message);
-			}
-
-			onDelete(document.id);
-		} catch (err) {
-			console.error("Delete error:", err);
-			setIsDeleting(false);
-		}
-	}, [document, onDelete]);
-
-	const handleOpen = useCallback(async () => {
-		const supabase = createClient();
-		const { data } = supabase.storage
-			.from("documents")
-			.getPublicUrl(document.path);
-
-		if (data?.publicUrl) {
-			window.open(data.publicUrl, "_blank");
-		}
-	}, [document.path]);
+		},
+		[document.path],
+	);
 
 	return (
-		<div
-			className={cn(
-				"group relative p-5 rounded-xl border transition-all duration-300",
-				"bg-white dark:bg-slate-800/50",
-				"border-slate-200 dark:border-slate-700",
-				"hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50",
-				"hover:border-slate-300 dark:hover:border-slate-600",
-				isDeleting && "opacity-50 pointer-events-none",
-			)}
-		>
-			<div className="flex items-start gap-4">
-				{/* PDF Icon */}
-				<div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-rose-100 to-rose-200 dark:from-rose-900/30 dark:to-rose-800/30">
-					<FileText className="w-6 h-6 text-rose-600 dark:text-rose-400" />
-				</div>
+		<Link href={`/${document.id}`}>
+			<div
+				className={cn(
+					"group relative p-5 rounded-xl border transition-all duration-300 cursor-pointer",
+					"bg-white dark:bg-slate-800/50",
+					"border-slate-200 dark:border-slate-700",
+					"hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50",
+					"hover:border-slate-300 dark:hover:border-slate-600",
+					"hover:scale-[1.01]",
+					isDeleting && "opacity-50 pointer-events-none",
+				)}
+			>
+				<div className="flex items-start gap-4">
+					{/* PDF Icon */}
+					<div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-rose-100 to-rose-200 dark:from-rose-900/30 dark:to-rose-800/30">
+						<FileText className="w-6 h-6 text-rose-600 dark:text-rose-400" />
+					</div>
 
-				{/* Content */}
-				<div className="flex-1 min-w-0">
-					<h3 className="font-medium text-slate-800 dark:text-slate-100 truncate pr-2">
-						{document.name}
-					</h3>
-					<div className="flex items-center gap-3 mt-1.5 text-sm text-slate-500 dark:text-slate-400">
-						<span>{formatFileSize(document.size)}</span>
-						<span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
-						<span>{formatDate(document.created_at)}</span>
+					{/* Content */}
+					<div className="flex-1 min-w-0">
+						<div className="flex items-center gap-2 mb-1">
+							<h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">
+								{document.name}
+							</h3>
+							<StatusBadge status={document.status} />
+						</div>
+						<div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+							<span>{formatFileSize(document.size)}</span>
+							<span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+							<span>{formatDate(document.created_at)}</span>
+						</div>
+					</div>
+
+					{/* Actions */}
+					<div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={handleOpenPdf}
+							className="h-8 w-8 text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400"
+						>
+							<ExternalLink className="w-4 h-4" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={handleDelete}
+							disabled={isDeleting}
+							className="h-8 w-8 text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400"
+						>
+							<Trash2 className="w-4 h-4" />
+						</Button>
 					</div>
 				</div>
-
-				{/* Actions */}
-				<div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={handleOpen}
-						className="h-8 w-8 text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400"
-					>
-						<ExternalLink className="w-4 h-4" />
-					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={handleDelete}
-						disabled={isDeleting}
-						className="h-8 w-8 text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400"
-					>
-						<Trash2 className="w-4 h-4" />
-					</Button>
-				</div>
 			</div>
-		</div>
+		</Link>
 	);
 }
 
-export function DocumentList({ documents, onDocumentDeleted }: DocumentListProps) {
+export function DocumentList({
+	documents,
+	onDocumentDeleted,
+}: DocumentListProps) {
 	if (documents.length === 0) {
 		return (
 			<div className="text-center py-12">
@@ -163,4 +232,3 @@ export function DocumentList({ documents, onDocumentDeleted }: DocumentListProps
 		</div>
 	);
 }
-
