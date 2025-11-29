@@ -46,21 +46,20 @@ ${lessonContent.slice(0, 10000)}
 ${cardTypesDescription}
 
 ## Your Task
-Create a lesson plan that MUST include all 6 card types. For each card, specify:
+Create a lesson plan that MUST include all 5 card types. For each card, specify:
 1. The card type (from available types: ${availableTypes.join(", ")})
 2. What the card should focus on (a brief description)
 
 ## Requirements
-- You MUST include exactly one card of each of these 6 types: text, mc_question, fill_in_blank, infographic, interactive_visual, oral_exam
-- The lesson plan should have at least 6 cards (one of each type), but you can include more cards if needed (up to 8 total)
-- If you add extra cards, you can repeat card types, but all 6 types must appear at least once
+- You MUST include exactly one card of each of these 5 types: text, mc_question, fill_in_blank, infographic, interactive_visual
+- The lesson plan should have at least 5 cards (one of each type), but you can include more cards if needed (up to 8 total)
+- If you add extra cards, you can repeat card types, but all 5 types must appear at least once
 
 ## Guidelines
 - Start with 1-2 text cards to introduce concepts
 - Alternate between teaching (text) and testing (mc_question, fill_in_blank)
 - Include an infographic card to visualize key concepts
 - Include an interactive visual card to help the user understand the concept
-- Include an oral exam card to help the user practice speaking/recitation
 - End with a summary or final check
 - Each card should focus on ONE specific concept or question
 - Make the focuses specific and actionable
@@ -73,8 +72,7 @@ Return ONLY a JSON object with a "cards" array:
     { "type": "mc_question", "focus": "test understanding of basic derivative concepts" },
     { "type": "fill_in_blank", "focus": "practice applying the power rule by filling in blanks" },
     { "type": "infographic", "focus": "visualize the relationship between functions and their derivatives" },
-    { "type": "interactive_visual", "focus": "interactively explore how changing a function affects its derivative" },
-    { "type": "oral_exam", "focus": "recite and explain the power rule verbally" }
+    { "type": "interactive_visual", "focus": "interactively explore how changing a function affects its derivative" }
   ]
 }
 
@@ -99,16 +97,16 @@ No markdown code blocks. Just the raw JSON.`,
 			.filter((card) => availableTypes.includes(card.type))
 			.slice(0, 8); // Max 8 cards
 
-		// Check if all 6 card types are present
+		// Check if all 5 card types are present
 		const presentTypes = new Set(validCards.map((card) => card.type));
 		const allTypesPresent = availableTypes.every((type) =>
 			presentTypes.has(type),
 		);
 
-		// Ensure at least 6 cards with all types
-		if (validCards.length < 6 || !allTypesPresent) {
+		// Ensure at least 5 cards with all types
+		if (validCards.length < 5 || !allTypesPresent) {
 			console.warn(
-				"[Planner] Generated plan missing card types. Expected all 6 types, got:",
+				"[Planner] Generated plan missing card types. Expected all 5 types, got:",
 				Array.from(presentTypes),
 			);
 			return getDefaultPlan();
@@ -123,7 +121,7 @@ No markdown code blocks. Just the raw JSON.`,
 
 /**
  * Fallback plan if AI generation fails
- * Includes all 6 required card types
+ * Includes all 5 required card types
  */
 function getDefaultPlan(): LessonPlan {
 	return {
@@ -139,7 +137,6 @@ function getDefaultPlan(): LessonPlan {
 				type: "interactive_visual",
 				focus: "interactively explore the concept",
 			},
-			{ type: "oral_exam", focus: "practice explaining the concept verbally" },
 		],
 	};
 }
