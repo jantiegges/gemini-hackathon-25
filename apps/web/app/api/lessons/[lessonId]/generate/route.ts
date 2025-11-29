@@ -11,13 +11,19 @@ if (!apiKey) {
 const genAI = new GoogleGenAI({ apiKey });
 
 export async function POST(
-	_request: Request,
+	request: Request,
 	{ params }: { params: Promise<{ lessonId: string }> },
 ) {
 	const { lessonId } = await params;
 	const supabase = await createClient();
 
-	console.log(`[Generate] Starting card generation for lesson: ${lessonId}`);
+	// Check if force regeneration is requested
+	const url = new URL(request.url);
+	const forceRegenerate = url.searchParams.get("force") === "true";
+
+	console.log(`[Generate] Starting card generation for lesson: ${lessonId}`, {
+		forceRegenerate,
+	});
 
 	try {
 		// 1. Get the lesson
@@ -34,9 +40,27 @@ export async function POST(
 		}
 
 		// Check if already generated
-		if (lesson.status === "ready") {
+		if (lesson.status === "ready" && !forceRegenerate) {
 			console.log("[Generate] Cards already exist, skipping generation");
 			return NextResponse.json({ success: true, cached: true });
+		}
+
+		// If force regenerating, delete existing cards first
+		if (forceRegenerate && lesson.status === "ready") {
+			console.log("[Generate] Force regenerate: Deleting existing cards...");
+			const { error: deleteError } = await supabase
+				.from("cards")
+				.delete()
+				.eq("lesson_id", lessonId);
+
+			if (deleteError) {
+				console.error(
+					"[Generate] Failed to delete existing cards:",
+					deleteError,
+				);
+				throw new Error("Failed to delete existing cards");
+			}
+			console.log("[Generate] Existing cards deleted");
 		}
 
 		console.log(
