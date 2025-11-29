@@ -24,15 +24,19 @@ export function DocumentsContainer({
 	}, []);
 
 	return (
-		<div className="min-h-screen bg-app-background text-slate-900 relative">
-			{/* Fixed Background Gradient */}
-			<div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-				{/* Mesh Gradient Blobs */}
-				<div className="absolute top-[-15%] left-[-15%] w-[55vw] h-[55vw] bg-app-blob-pink rounded-full blur-[140px] opacity-60 mix-blend-multiply animate-blob" />
-				<div className="absolute top-[-5%] right-[-10%] w-[45vw] h-[45vw] bg-app-blob-purple rounded-full blur-[130px] opacity-55 mix-blend-multiply animate-blob animation-delay-2000" />
-				<div className="absolute bottom-[-25%] left-[10%] w-[70vw] h-[60vw] bg-app-blob-orange rounded-[45%] blur-[160px] opacity-60 mix-blend-multiply animate-blob animation-delay-4000" />
-				<div className="absolute bottom-[5%] right-[5%] w-[45vw] h-[45vw] bg-app-blob-blue rounded-full blur-[140px] opacity-60 mix-blend-multiply" />
-				<div className="absolute top-[25%] left-[40%] w-[35vw] h-[35vw] bg-app-blob-light-blue rounded-full blur-[120px] opacity-50 mix-blend-multiply" />
+		<div className="min-h-screen bg-white text-slate-900 relative overflow-hidden">
+			{/* Subtle 4-color mesh gradient background */}
+			<div className="fixed inset-0 pointer-events-none">
+				{/* Base gradient */}
+				<div className="absolute inset-0 bg-gradient-to-br from-rose-50/80 via-white to-sky-50/80" />
+				{/* Top-left: soft pink/rose */}
+				<div className="absolute -top-20 -left-20 w-[500px] h-[500px] rounded-full bg-rose-100/50 blur-3xl" />
+				{/* Top-right: soft violet/purple */}
+				<div className="absolute -top-20 -right-20 w-[500px] h-[500px] rounded-full bg-violet-100/50 blur-3xl" />
+				{/* Bottom-left: soft emerald/mint */}
+				<div className="absolute -bottom-20 -left-20 w-[500px] h-[500px] rounded-full bg-emerald-100/40 blur-3xl" />
+				{/* Bottom-right: soft amber/peach */}
+				<div className="absolute -bottom-20 -right-20 w-[500px] h-[500px] rounded-full bg-amber-100/50 blur-3xl" />
 			</div>
 
 			{/* Main Content */}
@@ -57,7 +61,7 @@ export function DocumentsContainer({
 											"Study Guides",
 										]}
 										duration={2800}
-										className="text-transparent bg-clip-text bg-gradient-to-r from-app-gradient-purple via-app-gradient-pink to-app-gradient-orange"
+										className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 via-rose-500 to-amber-500"
 										motionProps={{
 											initial: { opacity: 0, y: 20 },
 											animate: { opacity: 1, y: 0 },
@@ -83,7 +87,7 @@ export function DocumentsContainer({
 
 				{/* Documents List Card Overlay */}
 				<div className="w-full max-w-5xl mx-auto px-6 pb-20">
-					<div className="bg-white/85 backdrop-blur-2xl rounded-3xl shadow-xl shadow-app-blob-purple/25 border border-white/60 p-8">
+					<div className="bg-white/85 backdrop-blur-2xl rounded-3xl shadow-xl shadow-violet-200/50 border border-slate-200/60 p-8">
 						{/* Card Header */}
 						<div className="flex items-center justify-between mb-8">
 							<h2 className="text-2xl font-semibold text-slate-800/90">
@@ -101,19 +105,19 @@ export function DocumentsContainer({
 
 						{/* Filters */}
 						<div className="flex items-center gap-4 mb-8 text-sm text-slate-500">
-							<div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200/70 hover:border-app-blob-purple hover:shadow-sm transition-all cursor-text w-64">
+							<div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-violet-300 hover:shadow-sm transition-all cursor-text w-64">
 								<span>🔍</span>
 								<span>Search lessons...</span>
 							</div>
 							<button
 								type="button"
-								className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200/70 hover:border-app-blob-purple hover:shadow-sm transition-all"
+								className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-violet-300 hover:shadow-sm transition-all"
 							>
 								Last edited ▾
 							</button>
 							<button
 								type="button"
-								className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200/70 hover:border-app-blob-purple hover:shadow-sm transition-all"
+								className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-violet-300 hover:shadow-sm transition-all"
 							>
 								All types ▾
 							</button>
