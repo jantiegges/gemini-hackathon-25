@@ -57,7 +57,7 @@ export const fillInBlankCard: CardTypeDefinition = {
 
 	generate: async (context: GeneratorContext): Promise<GeneratedCard> => {
 		const result = await context.genAI.models.generateContent({
-			model: "gemini-2.5-flash",
+			model: "gemini-3-pro-preview",
 			contents: [
 				{
 					role: "user",
@@ -120,7 +120,9 @@ No markdown code blocks, just the raw JSON.`,
 				content.text = content.text.join(" ");
 			}
 			if (Array.isArray(content.explanation)) {
-				content.explanation = (content.explanation as unknown as string[]).join(" ");
+				content.explanation = (content.explanation as unknown as string[]).join(
+					" ",
+				);
 			}
 			// Validate
 			if (

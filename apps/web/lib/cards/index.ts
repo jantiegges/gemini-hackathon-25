@@ -30,19 +30,45 @@
 
 export type {
 	BlankOption,
+	BlankOption,
+	FillInBlankCardContent,
 	FillInBlankCardContent,
 } from "./cards/fill-in-blank";
-export type { InfographicCardContent } from "./cards/infographic";
-export type { McQuestionCardContent } from "./cards/mc-question";
+export type {
+	InfographicCardContent,
+	InfographicCardContent,
+} from "./cards/infographic";
+export type { InteractiveVisualCardContent } from "./cards/interactive-visual";
+export type {
+	McQuestionCardContent,
+	McQuestionCardContent,
+} from "./cards/mc-question";
+export type { OralExamCardContent } from "./cards/oral-exam";
 // Card content types (for use in components)
-export type { TextCardContent } from "./cards/text";
+// Card content types (for use in components)
+export type { TextCardContent, TextCardContent } from "./cards/text";
 export type { VideoLearningCardContent } from "./cards/video-learning";
 // Generator
-export { generateCards, generateLesson } from "./generator";
+// Generator
+export {
+	generateCards,
+	generateCards,
+	generateLesson,
+	generateLesson,
+} from "./generator";
 // Planner
-export { planLesson } from "./planner";
+// Planner
+export { planLesson, planLesson } from "./planner";
 // Registry
-export { cardTypes, getCardType, getCardTypeNames } from "./registry";
+// Registry
+export {
+	cardTypes,
+	cardTypes,
+	getCardType,
+	getCardType,
+	getCardTypeNames,
+	getCardTypeNames,
+} from "./registry";
 // Types
 export type {
 	CardTypeDefinition,

@@ -9,9 +9,14 @@
 
 import { fillInBlankCard } from "./cards/fill-in-blank";
 import { infographicCard } from "./cards/infographic";
+import { interactiveVisualCard } from "./cards/interactive-visual";
 import { mcQuestionCard } from "./cards/mc-question";
+import { oralExamCard } from "./cards/oral-exam";
 import { textCard } from "./cards/text";
+<<<<<<< HEAD
 import { videoLearningCard } from "./cards/video-learning";
+=======
+>>>>>>> main
 import type { CardTypeDefinition } from "./types";
 
 /**
@@ -23,7 +28,12 @@ export const cardTypes: CardTypeDefinition[] = [
 	mcQuestionCard,
 	fillInBlankCard,
 	infographicCard,
+<<<<<<< HEAD
 	videoLearningCard,
+=======
+	interactiveVisualCard,
+	oralExamCard,
+>>>>>>> main
 	// Future card types:
 	// audioCard,
 	// matchingCard,

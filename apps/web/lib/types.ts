@@ -48,6 +48,10 @@ export type CardType =
 export interface TextCardContent {
 	title: string;
 	body: string; // Markdown with LaTeX
+	/** Optional path to a generated image in Supabase Storage */
+	imagePath?: string;
+	/** Alt text / description of the image */
+	imageDescription?: string;
 }
 
 export interface McQuestionCardContent {

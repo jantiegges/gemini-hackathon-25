@@ -1,18 +1,26 @@
 "use client";
 
+import { cn } from "@workspace/ui/lib/utils";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
 import { MarkdownContent } from "@/components/markdown-content";
 import type { BlankOption, FillInBlankCardContent } from "@/lib/cards";
-import { Button } from "@workspace/ui/components/button";
-import { cn } from "@workspace/ui/lib/utils";
-import { ArrowRight, CheckCircle2, PenLine, XCircle } from "lucide-react";
-import { useState } from "react";
+import type { ActionButtonConfig } from "./card-template";
 
 interface FillInBlankCardProps {
 	content: FillInBlankCardContent;
 	onAnswer: (isCorrect: boolean) => void;
+	setActionButton: (config: ActionButtonConfig | null) => void;
 }
 
-export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
+export function FillInBlankCard({
+	content,
+	onAnswer,
+	setActionButton,
+}: FillInBlankCardProps) {
 	const [selectedAnswers, setSelectedAnswers] = useState<
 		Record<string, string>
 	>({});
@@ -50,10 +58,41 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 		onAnswer(isCorrect);
 	};
 
+	// Update action button based on state
+	useEffect(() => {
+		if (!hasSubmitted) {
+			setActionButton({
+				onClick: handleSubmit,
+				text: "Check Answers",
+				disabled: !allBlanksAnswered,
+				className: cn(
+					"w-full shadow-lg text-sm sm:text-base",
+					allBlanksAnswered
+						? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-amber-500/25"
+						: "bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed",
+				),
+				showArrow: false,
+			});
+		} else {
+			setActionButton({
+				onClick: handleContinue,
+				text: "Continue",
+				className: cn(
+					"w-full shadow-lg text-sm sm:text-base",
+					isCorrect
+						? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-emerald-500/25"
+						: "bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white shadow-slate-500/25",
+				),
+				showArrow: true,
+			});
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [hasSubmitted, allBlanksAnswered, isCorrect, setActionButton]);
+
 	// Render the text with blanks replaced by dropdowns/selections
 	const renderTextWithBlanks = () => {
 		const parts: React.ReactNode[] = [];
-		let remaining = content.text;
+		const remaining = content.text;
 		let key = 0;
 
 		const blankRegex = /\{\{(\w+)\}\}/g;
@@ -65,8 +104,25 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 			if (match.index > lastIndex) {
 				const textBefore = remaining.slice(lastIndex, match.index);
 				parts.push(
-					<span key={key++} className="[&_p]:inline">
-						<MarkdownContent content={textBefore} />
+					<span key={key++} className="inline">
+						<ReactMarkdown
+							remarkPlugins={[remarkMath]}
+							rehypePlugins={[rehypeKatex]}
+							components={{
+								p: ({ children }) => <span className="inline">{children}</span>,
+								strong: ({ children }) => (
+									<strong className="font-semibold">{children}</strong>
+								),
+								em: ({ children }) => <em>{children}</em>,
+								code: ({ children }) => (
+									<code className="text-violet-600 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono">
+										{children}
+									</code>
+								),
+							}}
+						>
+							{textBefore}
+						</ReactMarkdown>
 					</span>,
 				);
 			}
@@ -79,7 +135,7 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 
 			// Add the blank dropdown
 			parts.push(
-				<span key={key++} className="inline-block mx-1 align-middle">
+				<span key={key++} className="inline mx-1 align-middle">
 					<BlankDropdown
 						blankId={blankId}
 						options={options || []}
@@ -99,8 +155,25 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 		if (lastIndex < content.text.length) {
 			const textAfter = content.text.slice(lastIndex);
 			parts.push(
-				<span key={key++} className="[&_p]:inline">
-					<MarkdownContent content={textAfter} />
+				<span key={key++} className="inline">
+					<ReactMarkdown
+						remarkPlugins={[remarkMath]}
+						rehypePlugins={[rehypeKatex]}
+						components={{
+							p: ({ children }) => <span className="inline">{children}</span>,
+							strong: ({ children }) => (
+								<strong className="font-semibold">{children}</strong>
+							),
+							em: ({ children }) => <em>{children}</em>,
+							code: ({ children }) => (
+								<code className="text-violet-600 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono">
+									{children}
+								</code>
+							),
+						}}
+					>
+						{textAfter}
+					</ReactMarkdown>
 				</span>,
 			);
 		}
@@ -110,19 +183,9 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 
 	return (
 		<div className="flex flex-col h-full">
-			{/* Header */}
-			<div className="flex items-center gap-3 mb-6">
-				<div className="p-2 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30">
-					<PenLine className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-				</div>
-				<h2 className="text-lg font-medium text-slate-600 dark:text-slate-400">
-					Fill in the Blanks
-				</h2>
-			</div>
-
 			{/* Text with blanks */}
-			<div className="flex-1">
-				<div className="text-lg leading-relaxed text-slate-700 dark:text-slate-200">
+			<div className="flex-1 overflow-y-auto min-h-0">
+				<div className="text-sm sm:text-base font-light leading-relaxed text-slate-900/95 dark:text-slate-100 break-words [&_*]:inline">
 					{renderTextWithBlanks()}
 				</div>
 			</div>
@@ -131,7 +194,7 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 			{hasSubmitted && (
 				<div
 					className={cn(
-						"mt-6 p-4 rounded-xl",
+						"mt-4 sm:mt-6 p-3 sm:p-4 rounded-lg sm:rounded-xl",
 						isCorrect
 							? "bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"
 							: "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800",
@@ -140,15 +203,15 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 					<div className="flex items-center gap-2 mb-2">
 						{isCorrect ? (
 							<>
-								<CheckCircle2 className="w-5 h-5 text-emerald-500" />
-								<span className="font-semibold text-emerald-700 dark:text-emerald-300">
+								<CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 flex-shrink-0" />
+								<span className="font-semibold text-sm sm:text-base text-emerald-800 dark:text-emerald-300">
 									All correct!
 								</span>
 							</>
 						) : (
 							<>
-								<XCircle className="w-5 h-5 text-red-500" />
-								<span className="font-semibold text-red-700 dark:text-red-300">
+								<XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0" />
+								<span className="font-semibold text-sm sm:text-base text-red-800 dark:text-red-300">
 									Some answers are incorrect
 								</span>
 							</>
@@ -156,49 +219,16 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 					</div>
 					<div
 						className={cn(
-							"text-sm [&_p]:mb-0",
+							"text-xs sm:text-sm font-light [&_p]:mb-0",
 							isCorrect
-								? "text-emerald-600 dark:text-emerald-400"
-								: "text-red-600 dark:text-red-400",
+								? "text-emerald-800/95 dark:text-emerald-300"
+								: "text-red-800/95 dark:text-red-300",
 						)}
 					>
 						<MarkdownContent content={content.explanation} />
 					</div>
 				</div>
 			)}
-
-			{/* Action button */}
-			<div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
-				{!hasSubmitted ? (
-					<Button
-						onClick={handleSubmit}
-						disabled={!allBlanksAnswered}
-						className={cn(
-							"w-full shadow-lg",
-							allBlanksAnswered
-								? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-amber-500/25"
-								: "bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed",
-						)}
-						size="lg"
-					>
-						Check Answers
-					</Button>
-				) : (
-					<Button
-						onClick={handleContinue}
-						className={cn(
-							"w-full shadow-lg",
-							isCorrect
-								? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-emerald-500/25"
-								: "bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white shadow-slate-500/25",
-						)}
-						size="lg"
-					>
-						Continue
-						<ArrowRight className="w-4 h-4 ml-2" />
-					</Button>
-				)}
-			</div>
 		</div>
 	);
 }
@@ -224,24 +254,27 @@ function BlankDropdown({
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<div className="relative inline-block">
+		<span className="relative inline align-middle">
 			<button
+				type="button"
 				onClick={() => !hasSubmitted && setIsOpen(!isOpen)}
 				disabled={hasSubmitted}
 				className={cn(
-					"min-w-[120px] px-3 py-1.5 rounded-lg border-2 text-sm font-medium transition-all",
+					"inline-block align-middle px-2 sm:px-3 py-1.5 sm:py-2 rounded-md sm:rounded-lg border-2 text-xs sm:text-sm font-light transition-all min-h-[36px] sm:min-h-0",
 					hasSubmitted
 						? isCorrect
-							? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300"
-							: "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+							? "border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-900 dark:text-emerald-300"
+							: "border-red-600 bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-300"
 						: selected
-							? "border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
-							: "border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:border-slate-400",
+							? "border-amber-600 bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 active:scale-95"
+							: "border-dashed border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-slate-400 hover:text-slate-900 active:scale-95",
 				)}
 			>
 				{selected || "Select..."}
 				{hasSubmitted && !isCorrect && (
-					<span className="ml-2 text-xs text-red-500">→ {correctAnswer}</span>
+					<span className="ml-1 sm:ml-2 text-xs text-red-500">
+						→ {correctAnswer}
+					</span>
 				)}
 			</button>
 
@@ -253,7 +286,7 @@ function BlankDropdown({
 						onClick={() => setIsOpen(false)}
 					/>
 					{/* Dropdown */}
-					<div className="absolute z-20 top-full left-0 mt-1 min-w-[150px] bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1">
+					<div className="absolute z-20 top-full left-0 mt-1 min-w-[140px] sm:min-w-[150px] max-w-[200px] sm:max-w-none bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 max-h-[200px] sm:max-h-none overflow-y-auto">
 						{options.map((option, idx) => (
 							<button
 								key={idx}
@@ -262,9 +295,9 @@ function BlankDropdown({
 									setIsOpen(false);
 								}}
 								className={cn(
-									"w-full px-3 py-2 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors",
+									"w-full px-3 py-2 sm:py-2.5 text-left text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors min-h-[40px] sm:min-h-0 text-slate-900 dark:text-slate-100",
 									selected === option.text &&
-										"bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300",
+										"bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300",
 								)}
 							>
 								<MarkdownContent content={option.text} />
@@ -273,7 +306,6 @@ function BlankDropdown({
 					</div>
 				</>
 			)}
-		</div>
+		</span>
 	);
 }
-

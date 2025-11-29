@@ -40,7 +40,7 @@ export const infographicCard: CardTypeDefinition = {
 	generate: async (context: GeneratorContext): Promise<GeneratedCard> => {
 		// First, generate the prompt and metadata for the infographic
 		const metadataResult = await context.genAI.models.generateContent({
-			model: "gemini-2.5-flash",
+			model: "gemini-3-pro-preview",
 			contents: [
 				{
 					role: "user",
