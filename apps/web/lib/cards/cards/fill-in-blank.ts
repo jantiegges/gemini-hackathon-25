@@ -120,7 +120,9 @@ No markdown code blocks, just the raw JSON.`,
 				content.text = content.text.join(" ");
 			}
 			if (Array.isArray(content.explanation)) {
-				content.explanation = (content.explanation as unknown as string[]).join(" ");
+				content.explanation = (content.explanation as unknown as string[]).join(
+					" ",
+				);
 			}
 			// Validate
 			if (

@@ -469,7 +469,11 @@ function ProgressSidebar({
 	);
 }
 
-export function LearningPath({ documentId, lessons, documentName }: LearningPathProps) {
+export function LearningPath({
+	documentId,
+	lessons,
+	documentName,
+}: LearningPathProps) {
 	if (lessons.length === 0) {
 		return (
 			<div className="text-center py-12">
@@ -504,7 +508,7 @@ export function LearningPath({ documentId, lessons, documentName }: LearningPath
 	return (
 		<div className="pb-8">
 			{/* Document Title */}
-			<h1 className="text-3xl md:text-4xl font-extrabold italic text-center mb-20 bg-gradient-to-r from-violet-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent tracking-tight">
+			<h1 className="text-3xl md:text-4xl font-display font-semibold italic text-center pt-24 pb-8 mb-12 bg-gradient-to-r from-violet-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent tracking-tight">
 				{documentName}
 			</h1>
 
@@ -514,79 +518,79 @@ export function LearningPath({ documentId, lessons, documentName }: LearningPath
 					className="relative"
 					style={{ width: CONTAINER_WIDTH, height: totalHeight }}
 				>
-						{/* Connectors */}
-						<PathConnectors nodeCount={lessons.length} />
+					{/* Connectors */}
+					<PathConnectors nodeCount={lessons.length} />
 
-						{/* Lesson nodes */}
-						{lessons.map((lesson, index) => (
-							<LessonNode
-								key={lesson.id}
-								lesson={lesson}
-								index={index}
-								isUnlocked={getIsUnlocked(index)}
-								documentId={documentId}
-							/>
-						))}
+					{/* Lesson nodes */}
+					{lessons.map((lesson, index) => (
+						<LessonNode
+							key={lesson.id}
+							lesson={lesson}
+							index={index}
+							isUnlocked={getIsUnlocked(index)}
+							documentId={documentId}
+						/>
+					))}
 
-						{/* Trophy / Finish Node */}
-						<motion.div
-							initial={{ scale: 0, opacity: 0 }}
-							animate={{ scale: 1, opacity: 1 }}
-							transition={{ delay: lessons.length * 0.1, type: "spring" }}
-							className="absolute flex flex-col items-center"
-							style={{
-								left: trophyPos.x - 40,
-								top: trophyPos.y - 40,
-								width: 80,
-							}}
-						>
-							{/* Glow effect for incomplete state */}
-							{!allCompleted && (
-								<motion.div
-									animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0.1, 0.4] }}
-									transition={{
-										duration: 3,
-										repeat: Infinity,
-										ease: "easeInOut",
-									}}
-									className="absolute w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 blur-xl"
-								/>
-							)}
+					{/* Trophy / Finish Node */}
+					<motion.div
+						initial={{ scale: 0, opacity: 0 }}
+						animate={{ scale: 1, opacity: 1 }}
+						transition={{ delay: lessons.length * 0.1, type: "spring" }}
+						className="absolute flex flex-col items-center"
+						style={{
+							left: trophyPos.x - 40,
+							top: trophyPos.y - 40,
+							width: 80,
+						}}
+					>
+						{/* Glow effect for incomplete state */}
+						{!allCompleted && (
 							<motion.div
-								whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
-								transition={{ duration: 0.4 }}
-								className={cn(
-									"relative w-20 h-20 rounded-full flex items-center justify-center shadow-lg border-b-4",
-									allCompleted
-										? "bg-gradient-to-b from-yellow-300 to-amber-500 shadow-amber-500/40 cursor-pointer border-amber-600 animate-bounce"
-										: "bg-gradient-to-b from-amber-200 to-amber-400 shadow-amber-400/30 border-amber-500 cursor-default",
-								)}
-								style={allCompleted ? { animationDuration: "2s" } : {}}
-							>
-								{/* Shine effect */}
-								<div className="absolute inset-1 rounded-full bg-white/30" />
-								<Crown
-									className={cn(
-										"w-10 h-10 drop-shadow-md",
-										allCompleted
-											? "text-white fill-white"
-											: "text-amber-700 fill-amber-700",
-									)}
-								/>
-							</motion.div>
-							<motion.p
-								animate={!allCompleted ? { y: [0, -3, 0] } : {}}
+								animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0.1, 0.4] }}
 								transition={{
-									duration: 2,
+									duration: 3,
 									repeat: Infinity,
 									ease: "easeInOut",
 								}}
-								className="mt-3 text-sm font-bold tracking-wide text-amber-600"
-							>
-								{allCompleted ? "Course Complete! 🎉" : "🏆 FINISH"}
-							</motion.p>
+								className="absolute w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 blur-xl"
+							/>
+						)}
+						<motion.div
+							whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+							transition={{ duration: 0.4 }}
+							className={cn(
+								"relative w-20 h-20 rounded-full flex items-center justify-center shadow-lg border-b-4",
+								allCompleted
+									? "bg-gradient-to-b from-yellow-300 to-amber-500 shadow-amber-500/40 cursor-pointer border-amber-600 animate-bounce"
+									: "bg-gradient-to-b from-amber-200 to-amber-400 shadow-amber-400/30 border-amber-500 cursor-default",
+							)}
+							style={allCompleted ? { animationDuration: "2s" } : {}}
+						>
+							{/* Shine effect */}
+							<div className="absolute inset-1 rounded-full bg-white/30" />
+							<Crown
+								className={cn(
+									"w-10 h-10 drop-shadow-md",
+									allCompleted
+										? "text-white fill-white"
+										: "text-amber-700 fill-amber-700",
+								)}
+							/>
 						</motion.div>
-					</div>
+						<motion.p
+							animate={!allCompleted ? { y: [0, -3, 0] } : {}}
+							transition={{
+								duration: 2,
+								repeat: Infinity,
+								ease: "easeInOut",
+							}}
+							className="mt-3 text-sm font-bold tracking-wide text-amber-600"
+						>
+							{allCompleted ? "Course Complete! 🎉" : "🏆 FINISH"}
+						</motion.p>
+					</motion.div>
+				</div>
 			</div>
 		</div>
 	);

@@ -111,8 +111,8 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 	return (
 		<div className="flex flex-col h-full">
 			{/* Text with blanks */}
-			<div className="flex-1 overflow-y-auto">
-				<div className="text-base leading-relaxed text-slate-700 dark:text-slate-200 [&_p]:mb-4">
+			<div className="flex-1 overflow-y-auto min-h-0">
+				<div className="text-sm sm:text-base font-light leading-relaxed text-slate-600/90 dark:text-slate-200 [&_p]:mb-3 sm:[&_p]:mb-4">
 					{renderTextWithBlanks()}
 				</div>
 			</div>
@@ -121,7 +121,7 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 			{hasSubmitted && (
 				<div
 					className={cn(
-						"mt-6 p-4 rounded-xl",
+						"mt-4 sm:mt-6 p-3 sm:p-4 rounded-lg sm:rounded-xl",
 						isCorrect
 							? "bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"
 							: "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800",
@@ -130,15 +130,15 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 					<div className="flex items-center gap-2 mb-2">
 						{isCorrect ? (
 							<>
-								<CheckCircle2 className="w-5 h-5 text-emerald-500" />
-								<span className="font-semibold text-emerald-700 dark:text-emerald-300">
+								<CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 flex-shrink-0" />
+								<span className="font-semibold text-sm sm:text-base text-emerald-700 dark:text-emerald-300">
 									All correct!
 								</span>
 							</>
 						) : (
 							<>
-								<XCircle className="w-5 h-5 text-red-500" />
-								<span className="font-semibold text-red-700 dark:text-red-300">
+								<XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 flex-shrink-0" />
+								<span className="font-semibold text-sm sm:text-base text-red-700 dark:text-red-300">
 									Some answers are incorrect
 								</span>
 							</>
@@ -146,10 +146,10 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 					</div>
 					<div
 						className={cn(
-							"text-sm [&_p]:mb-0",
+							"text-xs sm:text-sm font-light [&_p]:mb-0",
 							isCorrect
-								? "text-emerald-600 dark:text-emerald-400"
-								: "text-red-600 dark:text-red-400",
+								? "text-emerald-600/90 dark:text-emerald-400"
+								: "text-red-600/90 dark:text-red-400",
 						)}
 					>
 						<MarkdownContent content={content.explanation} />
@@ -158,13 +158,13 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 			)}
 
 			{/* Action button */}
-			<div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-700">
+			<div className="mt-auto pt-4 sm:pt-6 border-t border-slate-200 dark:border-slate-700">
 				{!hasSubmitted ? (
 					<Button
 						onClick={handleSubmit}
 						disabled={!allBlanksAnswered}
 						className={cn(
-							"w-full shadow-lg",
+							"w-full shadow-lg text-sm sm:text-base",
 							allBlanksAnswered
 								? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-amber-500/25"
 								: "bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed",
@@ -177,7 +177,7 @@ export function FillInBlankCard({ content, onAnswer }: FillInBlankCardProps) {
 					<Button
 						onClick={handleContinue}
 						className={cn(
-							"w-full shadow-lg",
+							"w-full shadow-lg text-sm sm:text-base",
 							isCorrect
 								? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-emerald-500/25"
 								: "bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white shadow-slate-500/25",
@@ -219,19 +219,23 @@ function BlankDropdown({
 				onClick={() => !hasSubmitted && setIsOpen(!isOpen)}
 				disabled={hasSubmitted}
 				className={cn(
-					"min-w-[120px] px-3 py-1.5 rounded-lg border-2 text-sm font-medium transition-all",
+					"min-w-[100px] sm:min-w-[120px] px-2 sm:px-3 py-1.5 sm:py-2 rounded-md sm:rounded-lg border-2 text-xs sm:text-sm font-light transition-all min-h-[36px] sm:min-h-0",
 					hasSubmitted
 						? isCorrect
 							? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300"
 							: "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
 						: selected
-							? "border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
-							: "border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:border-slate-400",
+							? "border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 active:scale-95"
+							: "border-dashed border-slate-300 dark:border-slate-600 text-slate-500/80 hover:border-slate-400 hover:text-slate-600 active:scale-95",
 				)}
 			>
-				{selected || "Select..."}
+				<span className="truncate block max-w-[120px] sm:max-w-none">
+					{selected || "Select..."}
+				</span>
 				{hasSubmitted && !isCorrect && (
-					<span className="ml-2 text-xs text-red-500">→ {correctAnswer}</span>
+					<span className="ml-1 sm:ml-2 text-xs text-red-500 whitespace-nowrap">
+						→ {correctAnswer}
+					</span>
 				)}
 			</button>
 
@@ -243,7 +247,7 @@ function BlankDropdown({
 						onClick={() => setIsOpen(false)}
 					/>
 					{/* Dropdown */}
-					<div className="absolute z-20 top-full left-0 mt-1 min-w-[150px] bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1">
+					<div className="absolute z-20 top-full left-0 mt-1 min-w-[140px] sm:min-w-[150px] max-w-[200px] sm:max-w-none bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 max-h-[200px] sm:max-h-none overflow-y-auto">
 						{options.map((option, idx) => (
 							<button
 								key={idx}
@@ -252,7 +256,7 @@ function BlankDropdown({
 									setIsOpen(false);
 								}}
 								className={cn(
-									"w-full px-3 py-2 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors",
+									"w-full px-3 py-2 sm:py-2.5 text-left text-xs sm:text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors min-h-[40px] sm:min-h-0",
 									selected === option.text &&
 										"bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300",
 								)}

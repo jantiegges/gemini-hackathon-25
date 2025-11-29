@@ -54,9 +54,9 @@ export function DocumentsContainer({
 								🍌 New: Auto-generated infographics with Nano Banana
 							</div>
 
-							<h1 className="text-4xl md:text-6xl font-light tracking-[-0.02em] text-slate-900/95">
-								Turn documents into{" "}
-								<span className="inline-block align-baseline">
+							<h1 className="text-4xl md:text-6xl font-display font-semibold tracking-[-0.02em] text-slate-900/95 flex flex-col">
+								<span>Turn documents into</span>
+								<span className="block">
 									<WordRotate
 										words={[
 											"Lessons",

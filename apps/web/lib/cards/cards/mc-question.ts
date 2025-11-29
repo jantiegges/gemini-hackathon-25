@@ -52,7 +52,7 @@ ${context.lessonContent.slice(0, 8000)}
 Your task: Create a question that ${context.focus}
 
 Requirements:
-- Question: Clear, specific, tests understanding (not just recall)
+- Question: Clear, specific, concise (not too lenghty), tests understanding (not just recall)
 - Options: Exactly 4 options, all plausible
 - One correct answer, three distractors
 - Distractors should be common misconceptions or related but wrong

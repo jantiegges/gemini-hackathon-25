@@ -93,7 +93,7 @@ export function CardTemplate({
 							/>
 						);
 					})}
-					<div className="ml-auto text-xs font-normal text-slate-500 uppercase tracking-widest">
+					<div className="ml-auto text-xs font-light text-slate-600/90 uppercase tracking-widest">
 						Part {progress.current} of {progress.total}
 					</div>
 				</div>
@@ -119,7 +119,9 @@ export function CardTemplate({
 			)}
 
 			{/* Content - Flexible children */}
-			<div className="flex-1 flex flex-col min-h-full">{children}</div>
+			<div className="flex-1 flex flex-col overflow-y-auto min-h-0">
+				{children}
+			</div>
 
 			{/* Continue Button */}
 			{onContinue && (
