@@ -198,12 +198,23 @@ Important: Return ONLY valid JSON, no markdown formatting or code blocks.`,
 			console.log("[Process] Using fallback lessons");
 		}
 
-		// 9. Insert lessons with ordering
+		// 9. Insert lessons with ordering and chunk ranges
 		console.log("[Process] Step 9: Inserting lessons into database...");
+		const totalChunks = pages.length;
+		const lessonsCount = lessons.length;
+		const chunksPerLesson = Math.ceil(totalChunks / lessonsCount);
+
 		let prevLessonId: string | null = null;
 		for (let i = 0; i < lessons.length; i++) {
 			const lesson = lessons[i];
 			if (!lesson) continue;
+
+			// Calculate chunk range for this lesson
+			const startChunkIndex = i * chunksPerLesson;
+			const endChunkIndex = Math.min(
+				startChunkIndex + chunksPerLesson - 1,
+				totalChunks - 1,
+			);
 
 			const { data, error: lessonError } = await supabase
 				.from("lessons")
@@ -213,6 +224,9 @@ Important: Return ONLY valid JSON, no markdown formatting or code blocks.`,
 					description: lesson.description,
 					prev_lesson_id: prevLessonId,
 					order_index: i,
+					start_chunk_index: startChunkIndex,
+					end_chunk_index: endChunkIndex,
+					status: "pending",
 				})
 				.select("id")
 				.single();
@@ -222,7 +236,9 @@ Important: Return ONLY valid JSON, no markdown formatting or code blocks.`,
 				continue;
 			}
 
-			console.log(`[Process] Inserted lesson ${i + 1}: ${lesson.title}`);
+			console.log(
+				`[Process] Inserted lesson ${i + 1}: ${lesson.title} (chunks ${startChunkIndex}-${endChunkIndex})`,
+			);
 			prevLessonId = data.id as string;
 		}
 

@@ -1,10 +1,10 @@
 "use client";
 
-import type { Lesson } from "@/lib/types";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { CheckCircle2, Lock, Play, Star } from "lucide-react";
 import Link from "next/link";
+import type { Lesson } from "@/lib/types";
 
 interface LearningPathProps {
 	documentId: string;
@@ -27,7 +27,7 @@ interface LessonNodeProps {
 	lesson: Lesson;
 	index: number;
 	isFirst: boolean;
-	isLast: boolean;
+	isUnlocked: boolean;
 	documentId: string;
 }
 
@@ -35,7 +35,7 @@ function LessonNode({
 	lesson,
 	index,
 	isFirst,
-	isLast,
+	isUnlocked,
 	documentId,
 }: LessonNodeProps) {
 	const colorIndex = index % lessonColors.length;
@@ -44,26 +44,31 @@ function LessonNode({
 	// Calculate horizontal offset for the winding path effect
 	const offset = Math.sin((index * Math.PI) / 2) * 60;
 
-	// For now, first lesson is active, rest are locked
-	// In the future, you'd track progress
-	const isActive = isFirst;
-	const isCompleted = false;
-	const isLocked = !isFirst && !isCompleted;
+	const isCompleted = lesson.is_completed;
+	const isLocked = !isUnlocked;
+	const isActive = isUnlocked && !isCompleted;
 
 	return (
-		<div className="relative flex flex-col items-center" style={{ marginLeft: `${offset}px` }}>
+		<div
+			className="relative flex flex-col items-center"
+			style={{ marginLeft: `${offset}px` }}
+		>
 			{/* Connecting line to previous */}
 			{!isFirst && (
-				<div className="absolute -top-8 left-1/2 -translate-x-1/2 w-1 h-8 bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-500 rounded-full" />
+				<div
+					className={cn(
+						"absolute -top-8 left-1/2 -translate-x-1/2 w-1 h-8 rounded-full",
+						isUnlocked
+							? "bg-gradient-to-b from-emerald-400 to-emerald-500"
+							: "bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-500",
+					)}
+				/>
 			)}
 
 			{/* Lesson node */}
 			<Link
 				href={isLocked ? "#" : `/${documentId}/${lesson.id}`}
-				className={cn(
-					"relative group",
-					isLocked && "pointer-events-none",
-				)}
+				className={cn("relative group", isLocked && "pointer-events-none")}
 			>
 				{/* Glow effect for active */}
 				{isActive && (
@@ -82,9 +87,12 @@ function LessonNode({
 						"relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300",
 						isLocked
 							? "bg-slate-200 dark:bg-slate-700"
-							: `bg-gradient-to-br ${color.bg} shadow-lg ${color.shadow}`,
+							: isCompleted
+								? "bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30"
+								: `bg-gradient-to-br ${color.bg} shadow-lg ${color.shadow}`,
 						!isLocked && "hover:scale-110 hover:shadow-xl cursor-pointer",
-						isActive && "ring-4 ring-white dark:ring-slate-800 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-900",
+						isActive &&
+							"ring-4 ring-white dark:ring-slate-800 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-900",
 					)}
 				>
 					{isCompleted ? (
@@ -113,11 +121,20 @@ function LessonNode({
 						"absolute -top-2 -left-2 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
 						isLocked
 							? "bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400"
-							: "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-md",
+							: isCompleted
+								? "bg-emerald-500 text-white shadow-md"
+								: "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-md",
 					)}
 				>
-					{index + 1}
+					{isCompleted ? "✓" : index + 1}
 				</div>
+
+				{/* Score badge for completed lessons */}
+				{isCompleted && lesson.best_score !== null && (
+					<div className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-amber-400 text-amber-900 text-xs font-bold shadow-md">
+						{lesson.best_score}%
+					</div>
+				)}
 			</Link>
 
 			{/* Lesson info */}
@@ -139,7 +156,7 @@ function LessonNode({
 				)}
 			</div>
 
-			{/* Start button for active lesson */}
+			{/* Start/Continue button for active lesson */}
 			{isActive && (
 				<Button
 					asChild
@@ -149,6 +166,13 @@ function LessonNode({
 						<Play className="w-4 h-4 mr-2 fill-current" />
 						Start Lesson
 					</Link>
+				</Button>
+			)}
+
+			{/* Retry button for completed lessons */}
+			{isCompleted && (
+				<Button asChild variant="outline" className="mt-4" size="sm">
+					<Link href={`/${documentId}/${lesson.id}`}>Practice Again</Link>
 				</Button>
 			)}
 		</div>
@@ -166,6 +190,17 @@ export function LearningPath({ documentId, lessons }: LearningPathProps) {
 		);
 	}
 
+	// Determine which lessons are unlocked
+	// A lesson is unlocked if it's the first OR the previous lesson is completed
+	const getIsUnlocked = (index: number): boolean => {
+		if (index === 0) return true;
+		const prevLesson = lessons[index - 1];
+		return prevLesson?.is_completed ?? false;
+	};
+
+	// Check if all lessons are completed
+	const allCompleted = lessons.every((l) => l.is_completed);
+
 	return (
 		<div className="relative py-8">
 			{/* Path background decoration */}
@@ -181,22 +216,43 @@ export function LearningPath({ documentId, lessons }: LearningPathProps) {
 						lesson={lesson}
 						index={index}
 						isFirst={index === 0}
-						isLast={index === lessons.length - 1}
+						isUnlocked={getIsUnlocked(index)}
 						documentId={documentId}
 					/>
 				))}
 
 				{/* Finish flag at the end */}
 				<div className="flex flex-col items-center mt-4">
-					<div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
-						<span className="text-2xl">🏆</span>
+					<div
+						className={cn(
+							"w-16 h-16 rounded-full flex items-center justify-center shadow-lg",
+							allCompleted
+								? "bg-gradient-to-br from-yellow-400 to-orange-500 shadow-orange-500/30 animate-bounce"
+								: "bg-slate-200 dark:bg-slate-700",
+						)}
+						style={{ animationDuration: "2s" }}
+					>
+						<span
+							className={cn(
+								"text-2xl",
+								!allCompleted && "grayscale opacity-50",
+							)}
+						>
+							🏆
+						</span>
 					</div>
-					<p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">
-						Complete the course!
+					<p
+						className={cn(
+							"mt-3 text-sm font-medium",
+							allCompleted
+								? "text-amber-600 dark:text-amber-400"
+								: "text-slate-400 dark:text-slate-500",
+						)}
+					>
+						{allCompleted ? "Course Complete! 🎉" : "Complete all lessons"}
 					</p>
 				</div>
 			</div>
 		</div>
 	);
 }
-
