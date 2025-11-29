@@ -2,7 +2,7 @@
 
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { ImageIcon, Play } from "lucide-react";
+import { Play } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -12,22 +12,42 @@ import type { Lesson } from "@/lib/types";
 interface LessonCardProps {
 	lesson: Lesson;
 	documentId: string;
-	imagePath: string | null;
 }
 
-export function LessonCard({ lesson, documentId, imagePath }: LessonCardProps) {
+export function LessonCard({ lesson, documentId }: LessonCardProps) {
 	const [imageUrl, setImageUrl] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [hasImage, setHasImage] = useState<boolean | null>(null);
 
 	useEffect(() => {
-		if (!imagePath) {
-			setIsLoading(false);
-			return;
-		}
-
-		const loadImage = async () => {
+		const loadCardImage = async () => {
 			try {
 				const supabase = createClient();
+				
+				// Find the first infographic card for this lesson
+				const { data: cards } = await supabase
+					.from("cards")
+					.select("content")
+					.eq("lesson_id", lesson.id)
+					.eq("type", "infographic")
+					.order("order_index", { ascending: true })
+					.limit(1);
+
+				let imagePath: string | null = null;
+				if (cards && cards.length > 0 && cards[0]?.content) {
+					const content = cards[0].content as { imagePath?: string };
+					imagePath = content.imagePath ?? null;
+				}
+
+				if (!imagePath) {
+					setHasImage(false);
+					setIsLoading(false);
+					return;
+				}
+
+				setHasImage(true);
+
+				// Get signed URL for the image
 				const { data, error } = await supabase.storage
 					.from("documents")
 					.createSignedUrl(imagePath, 3600);
@@ -38,17 +58,51 @@ export function LessonCard({ lesson, documentId, imagePath }: LessonCardProps) {
 					setImageUrl(data.signedUrl);
 				}
 			} catch (err) {
-				console.error("Error loading image:", err);
+				console.error("Error loading card image:", err);
+				setHasImage(false);
 			} finally {
 				setIsLoading(false);
 			}
 		};
 
-		loadImage();
-	}, [imagePath]);
+		loadCardImage();
+	}, [lesson.id]);
 
 	const progress = lesson.best_score ?? 0;
 	const isCompleted = lesson.is_completed;
+
+	// Show skeleton while loading
+	if (isLoading) {
+		return (
+			<div className="flex-shrink-0 w-[400px] h-[240px]">
+				<div className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 animate-pulse">
+					{/* Skeleton background */}
+					<div className="absolute inset-0 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-200" />
+					
+					{/* Skeleton progress badge */}
+					<div className="absolute top-4 left-4">
+						<div className="bg-white/60 rounded-full w-20 h-7" />
+					</div>
+					
+					{/* Skeleton play button */}
+					<div className="absolute top-4 right-4">
+						<div className="bg-white/60 rounded-full w-10 h-10" />
+					</div>
+					
+					{/* Skeleton title */}
+					<div className="absolute bottom-4 left-4 right-4 space-y-2">
+						<div className="bg-white/40 rounded h-5 w-3/4" />
+						<div className="bg-white/40 rounded h-5 w-1/2" />
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	// Don't render if there's no image
+	if (!hasImage || !imageUrl) {
+		return null;
+	}
 
 	return (
 		<Link
@@ -62,23 +116,13 @@ export function LessonCard({ lesson, documentId, imagePath }: LessonCardProps) {
 				)}
 			>
 				{/* Background Image */}
-				{isLoading ? (
-					<div className="absolute inset-0 bg-slate-100 animate-pulse flex items-center justify-center">
-						<ImageIcon className="w-12 h-12 text-slate-300" />
-					</div>
-				) : imageUrl ? (
-					<Image
-						src={imageUrl}
-						alt={lesson.title}
-						fill
-						className="object-cover group-hover:scale-105 transition-transform duration-300"
-						unoptimized
-					/>
-				) : (
-					<div className="absolute inset-0 bg-gradient-to-br from-app-blob-purple/20 to-app-blob-blue/20 flex items-center justify-center">
-						<ImageIcon className="w-12 h-12 text-slate-400" />
-					</div>
-				)}
+				<Image
+					src={imageUrl}
+					alt={lesson.title}
+					fill
+					className="object-cover group-hover:scale-105 transition-transform duration-300"
+					unoptimized
+				/>
 
 				{/* Dark overlay gradient at bottom for text readability */}
 				<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
