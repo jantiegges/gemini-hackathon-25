@@ -1,5 +1,3 @@
-"use server";
-
 import type { createClient } from "@/lib/supabase/server";
 import type { DocumentStatus } from "@/lib/types";
 
@@ -11,8 +9,6 @@ export async function updateDocumentStatus(
 	documentId: string,
 	status: DocumentStatus,
 ): Promise<void> {
-	"use step";
-
 	console.log(`[Status] Updating document status to: ${status}`);
 
 	const { error } = await supabase

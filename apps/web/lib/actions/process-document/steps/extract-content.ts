@@ -1,5 +1,3 @@
-"use server";
-
 import type { createClient } from "@/lib/supabase/server";
 import { cleanJsonResponse, GEMINI_MODEL, genAI } from "./gemini";
 
@@ -10,8 +8,6 @@ export async function downloadAndConvertPdf(
 	supabase: Awaited<ReturnType<typeof createClient>>,
 	filePath: string,
 ): Promise<string> {
-	"use step";
-
 	console.log("[Extract] Downloading PDF from storage...");
 
 	const { data: fileData, error: downloadError } = await supabase.storage
@@ -38,8 +34,6 @@ export async function downloadAndConvertPdf(
  * Extract content from a PDF page by page using Gemini
  */
 export async function extractPdfContent(base64Data: string): Promise<string[]> {
-	"use step";
-
 	console.log("[Extract] Extracting content page by page with Gemini...");
 
 	const extractionResult = await genAI.models.generateContent({
