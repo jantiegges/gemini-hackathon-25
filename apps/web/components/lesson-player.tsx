@@ -1,6 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { type ReactElement, useCallback, useState } from "react";
 import type {
 	FillInBlankCardContent,
@@ -33,10 +35,41 @@ export function LessonPlayer({
 	lessonId,
 	cards,
 }: LessonPlayerProps) {
+	const router = useRouter();
 	const [currentCardIndex, setCurrentCardIndex] = useState(0);
 	const [correctAnswers, setCorrectAnswers] = useState(0);
 	const [isComplete, setIsComplete] = useState(false);
 	const [direction, setDirection] = useState<"forward" | "backward">("forward");
+	const [isRegenerating, setIsRegenerating] = useState(false);
+
+	const handleRegenerate = useCallback(async () => {
+		if (isRegenerating) return;
+
+		const confirmed = window.confirm(
+			"This will regenerate all cards for this lesson with new content and images. Continue?",
+		);
+		if (!confirmed) return;
+
+		setIsRegenerating(true);
+		try {
+			const response = await fetch(`/api/lessons/${lessonId}/generate?force=true`, {
+				method: "POST",
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.error || "Failed to regenerate");
+			}
+
+			// Refresh the page to show new cards
+			router.refresh();
+		} catch (error) {
+			console.error("Regeneration failed:", error);
+			alert("Failed to regenerate cards. Please try again.");
+		} finally {
+			setIsRegenerating(false);
+		}
+	}, [lessonId, router, isRegenerating]);
 
 	// Count total questions
 	const totalQuestions = cards.filter((c) =>
@@ -334,5 +367,18 @@ export function LessonPlayer({
 		);
 	};
 
-	return renderCard();
+	return (
+		<>
+			{renderCard()}
+			{/* Regenerate button - top right corner */}
+			<button
+				onClick={handleRegenerate}
+				disabled={isRegenerating}
+				className="fixed top-6 right-6 z-50 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200/40 text-slate-600 hover:text-slate-900 hover:bg-white/90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+				title="Regenerate cards with new images"
+			>
+				<RefreshCw className={`w-5 h-5 ${isRegenerating ? "animate-spin" : ""}`} />
+			</button>
+		</>
+	);
 }
