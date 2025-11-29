@@ -153,13 +153,13 @@ export function CardTemplate({
 			)}
 
 			{/* Content - Flexible children */}
-			<div className="flex-1 flex flex-col overflow-y-auto min-h-0">
+			<div className="flex-1 flex flex-col overflow-y-auto min-h-0 pb-4">
 				{renderedChildren}
 			</div>
 
 			{/* Action Button */}
 			{showActionButton && (
-				<div className="mt-auto pt-8 sm:pt-10 border-t border-slate-200 dark:border-slate-700">
+				<div className="mt-auto pt-8 border-t border-slate-200 dark:border-slate-700">
 					<Button
 						onClick={showActionButton.onClick}
 						disabled={showActionButton.disabled}
