@@ -1,3 +1,5 @@
+"use server";
+
 import type { createClient } from "@/lib/supabase/server";
 
 /**
@@ -8,6 +10,8 @@ export async function storeChunks(
 	documentId: string,
 	pages: string[],
 ): Promise<void> {
+	"use step";
+
 	console.log("[Chunks] Storing chunks in database...");
 
 	const chunkInserts = pages.map((content, index) => ({
@@ -27,4 +31,3 @@ export async function storeChunks(
 
 	console.log(`[Chunks] Inserted ${chunkInserts.length} chunks`);
 }
-

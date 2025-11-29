@@ -1,4 +1,6 @@
-import { cleanJsonResponse, genAI, GEMINI_MODEL } from "./gemini";
+"use server";
+
+import { cleanJsonResponse, GEMINI_MODEL, genAI } from "./gemini";
 
 export interface LessonData {
 	title: string;
@@ -15,6 +17,8 @@ const FALLBACK_LESSONS: LessonData[] = [
  * Generate lesson structure from extracted content using Gemini
  */
 export async function generateLessons(pages: string[]): Promise<LessonData[]> {
+	"use step";
+
 	console.log("[Lessons] Generating lessons with Gemini...");
 
 	const allContent = pages.join("\n\n---PAGE BREAK---\n\n");
@@ -60,4 +64,3 @@ Important: Return ONLY valid JSON, no markdown formatting or code blocks.`,
 
 	return lessons;
 }
-

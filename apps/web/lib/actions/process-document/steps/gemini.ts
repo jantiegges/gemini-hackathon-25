@@ -7,7 +7,7 @@ if (!apiKey) {
 
 export const genAI = new GoogleGenAI({ apiKey });
 
-export const GEMINI_MODEL = "gemini-2.0-flash";
+export const GEMINI_MODEL = "gemini-2.5-flash";
 
 /**
  * Clean JSON response from Gemini by removing markdown code blocks
@@ -18,4 +18,3 @@ export function cleanJsonResponse(text: string): string {
 		.replace(/```\n?/g, "")
 		.trim();
 }
-

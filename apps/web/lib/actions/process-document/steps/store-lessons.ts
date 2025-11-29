@@ -1,3 +1,5 @@
+"use server";
+
 import type { createClient } from "@/lib/supabase/server";
 import type { LessonData } from "./generate-lessons";
 
@@ -9,6 +11,8 @@ export async function storeLessons(
 	documentId: string,
 	lessons: LessonData[],
 ): Promise<void> {
+	"use step";
+
 	console.log("[Store] Inserting lessons into database...");
 
 	let prevLessonId: string | null = null;
@@ -40,4 +44,3 @@ export async function storeLessons(
 
 	console.log(`[Store] Completed inserting ${lessons.length} lessons`);
 }
-

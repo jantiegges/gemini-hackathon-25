@@ -22,6 +22,8 @@ export interface ProcessResult {
 export async function processDocument(
 	documentId: string,
 ): Promise<ProcessResult> {
+	"use workflow";
+
 	const supabase = await createClient();
 
 	console.log(`[Process] Starting processing for document: ${documentId}`);
