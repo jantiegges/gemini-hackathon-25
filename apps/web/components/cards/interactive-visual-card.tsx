@@ -117,10 +117,6 @@ export function InteractiveVisualCard({
 				</div>
 			</div>
 
-			{/* Description */}
-			<p className="mt-3 sm:mt-4 text-xs sm:text-sm font-light text-slate-900/95 dark:text-slate-100 text-center px-2">
-				{content.description}
-			</p>
 		</div>
 	);
 }
