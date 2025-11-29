@@ -7,11 +7,12 @@
  * 2. Import and add it to the cardTypes array below
  */
 
-import type { CardTypeDefinition } from "./types";
 import { fillInBlankCard } from "./cards/fill-in-blank";
 import { infographicCard } from "./cards/infographic";
 import { mcQuestionCard } from "./cards/mc-question";
 import { textCard } from "./cards/text";
+import { videoLearningCard } from "./cards/video-learning";
+import type { CardTypeDefinition } from "./types";
 
 /**
  * All available card types
@@ -22,6 +23,7 @@ export const cardTypes: CardTypeDefinition[] = [
 	mcQuestionCard,
 	fillInBlankCard,
 	infographicCard,
+	videoLearningCard,
 	// Future card types:
 	// audioCard,
 	// matchingCard,

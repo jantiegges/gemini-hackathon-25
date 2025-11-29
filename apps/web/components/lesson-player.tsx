@@ -1,18 +1,20 @@
 "use client";
 
+import { cn } from "@workspace/ui/lib/utils";
+import { useCallback, useState } from "react";
 import type {
 	FillInBlankCardContent,
 	InfographicCardContent,
 	McQuestionCardContent,
 	TextCardContent,
+	VideoLearningCardContent,
 } from "@/lib/cards";
 import type { Card } from "@/lib/types";
-import { cn } from "@workspace/ui/lib/utils";
-import { useCallback, useState } from "react";
 import { FillInBlankCard } from "./cards/fill-in-blank-card";
 import { InfographicCard } from "./cards/infographic-card";
 import { McQuestionCard } from "./cards/mc-question-card";
 import { TextCard } from "./cards/text-card";
+import { VideoLearningCard } from "./cards/video-learning-card";
 import { LessonComplete } from "./lesson-complete";
 
 interface LessonPlayerProps {
@@ -122,6 +124,14 @@ export function LessonPlayer({
 						onContinue={handleContinue}
 					/>
 				);
+			case "video_learning":
+				return (
+					<VideoLearningCard
+						key={currentCard.id}
+						content={currentCard.content as VideoLearningCardContent}
+						onContinue={handleContinue}
+					/>
+				);
 			default:
 				// Fallback for unknown card types - treat as text
 				return (
@@ -148,6 +158,9 @@ export function LessonPlayer({
 			}
 			if (card.type === "infographic") {
 				return "bg-fuchsia-400";
+			}
+			if (card.type === "video_learning") {
+				return "bg-rose-400"; // Video learning cards
 			}
 			return "bg-slate-400 dark:bg-slate-500"; // Completed non-questions
 		}

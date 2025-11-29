@@ -38,7 +38,12 @@ export interface Lesson {
 }
 
 // Card types
-export type CardType = "text" | "mc_question";
+export type CardType =
+	| "text"
+	| "mc_question"
+	| "fill_in_blank"
+	| "infographic"
+	| "video_learning";
 
 export interface TextCardContent {
 	title: string;
@@ -50,6 +55,36 @@ export interface McQuestionCardContent {
 	options: string[];
 	correct_index: number;
 	explanation: string;
+}
+
+export interface FillInBlankCardContent {
+	text: string;
+	blanks: Record<string, Array<{ text: string; isCorrect: boolean }>>;
+	explanation: string;
+}
+
+export interface InfographicCardContent {
+	title: string;
+	imagePath: string;
+	description: string;
+	caption?: string;
+}
+
+export interface VideoLearningCardContent {
+	/** Topic of the video */
+	topic: string;
+	/** Path to the generated video in Supabase Storage */
+	videoPath: string;
+	/** Description/alt text for the video */
+	description: string;
+	/** The prompt used to generate the video */
+	promptContext: string;
+	/** Duration of the video in seconds */
+	duration: number;
+	/** Optional caption shown below the video */
+	caption?: string;
+	/** Thumbnail image path */
+	thumbnailPath?: string;
 }
 
 export interface BaseCard {
@@ -69,7 +104,27 @@ export interface McQuestionCard extends BaseCard {
 	content: McQuestionCardContent;
 }
 
-export type Card = TextCard | McQuestionCard;
+export interface FillInBlankCard extends BaseCard {
+	type: "fill_in_blank";
+	content: FillInBlankCardContent;
+}
+
+export interface InfographicCard extends BaseCard {
+	type: "infographic";
+	content: InfographicCardContent;
+}
+
+export interface VideoLearningCard extends BaseCard {
+	type: "video_learning";
+	content: VideoLearningCardContent;
+}
+
+export type Card =
+	| TextCard
+	| McQuestionCard
+	| FillInBlankCard
+	| InfographicCard
+	| VideoLearningCard;
 
 // For API responses where content is raw JSON
 export interface RawCard {
@@ -77,6 +132,11 @@ export interface RawCard {
 	lesson_id: string;
 	type: CardType;
 	order_index: number;
-	content: TextCardContent | McQuestionCardContent;
+	content:
+		| TextCardContent
+		| McQuestionCardContent
+		| FillInBlankCardContent
+		| InfographicCardContent
+		| VideoLearningCardContent;
 	created_at: string;
 }

@@ -53,6 +53,8 @@ Create a lesson plan with 6-8 cards. For each card, specify:
 ## Guidelines
 - Start with 1-2 text cards to introduce concepts
 - Alternate between teaching (text) and testing (mc_question)
+- Include a video_learning card when the topic involves processes, visual demonstrations, or real-world phenomena
+- Consider using infographic for diagrams and video_learning for motion/processes
 - End with a summary or final check
 - Each card should focus on ONE specific concept or question
 - Make the focuses specific and actionable
@@ -62,6 +64,7 @@ Return ONLY a JSON object with a "cards" array:
 {
   "cards": [
     { "type": "text", "focus": "introduce the concept of derivatives and why they matter" },
+    { "type": "video_learning", "focus": "visualize how the slope of a tangent line changes along a curve" },
     { "type": "text", "focus": "explain the power rule with a clear example" },
     { "type": "mc_question", "focus": "test understanding of the power rule" },
     { "type": "mc_question", "focus": "apply the power rule to a new function" },
