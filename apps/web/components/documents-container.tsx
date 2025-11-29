@@ -6,22 +6,21 @@ import type { Document, Lesson } from "@/lib/types";
 import { DocumentUpload } from "./document-upload";
 import { LessonCardsScroll } from "./lesson-cards-scroll";
 
-interface LessonWithImage {
+interface LessonWithDocument {
 	lesson: Lesson;
 	documentId: string;
-	imagePath: string | null;
 }
 
 interface DocumentsContainerProps {
 	initialDocuments: Document[];
-	initialLessons?: LessonWithImage[];
+	initialLessons?: LessonWithDocument[];
 }
 
 export function DocumentsContainer({
-	initialDocuments,
+	initialDocuments: _initialDocuments,
 	initialLessons = [],
 }: DocumentsContainerProps) {
-	const [lessons] = useState<LessonWithImage[]>(initialLessons);
+	const [lessons] = useState<LessonWithDocument[]>(initialLessons);
 
 	const handleUploadComplete = useCallback((_newDocument: Document) => {
 		// Document upload handled by redirect
